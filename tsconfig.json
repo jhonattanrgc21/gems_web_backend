@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "es5",
+		"module": "commonjs",
+		"lib": ["es2017", "dom"],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"noImplicitAny": true,
+		"removeComments": true,
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"outDir": "./dist",
+		"baseUrl": "src",
+	},
+	"include": ["src"],
+	"exclude": ["node_modules"]
+}
