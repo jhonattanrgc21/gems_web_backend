@@ -1,6 +1,6 @@
 {
   "name": "gems_backend",
-  "version": "2.1.2",
+  "version": "2.3.2",
   "description": "Back-End de la plataforma del Grupo Empresarial Metain SAS",
   "main": "index.js",
   "scripts": {
