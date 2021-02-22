@@ -62,9 +62,7 @@ export default class ProjectController {
 		project.name = name;
 
 		// Asocio al usuario correspondiente
-		//project.user = await getRepository(User).findOne(id);
-
-		project.user = <any>{id};
+		project.user = await getRepository(User).findOne(id);
 
 		try {
 			// Si no hay errores, guardo el registro de proyectos

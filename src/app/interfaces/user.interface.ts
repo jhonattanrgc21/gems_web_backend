@@ -1,8 +1,7 @@
-// ======================================
-//			User Interface
-
 import Country from "../../database/entities/country.entity";
 
+// ======================================
+//			User Interface
 // ======================================
 export interface CreateUserInterface {
 	username: string;
