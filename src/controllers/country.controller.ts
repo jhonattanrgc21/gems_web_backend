@@ -8,17 +8,9 @@ import Country from '../database/entities/country.entity';
 export default class CountryController {
 	static getAll = async (req: Request, res: Response) => {
 		let countries;
-		try {
-			// Verifico si existen registros de paises
-			countries = await getRepository(Country).find({
-				select: ['code', 'name'],
-			});
-		} catch (error) {
-			// En caso contrario, envio un error.
-			return res.status(404).json({
-				message: 'Algo salio mal.',
-			});
-		}
+
+		// Verifico si existen registros de paises
+		countries = await getRepository(Country).find();
 
 		if (countries.length) {
 			res.json(countries);
@@ -33,9 +25,7 @@ export default class CountryController {
 		const { id } = req.params;
 		try {
 			// Si existen registros de paises, devuelvo sus datos.
-			const country = await getRepository(Country).findOneOrFail(id, {
-				select: ['code', 'name'],
-			});
+			const country = await getRepository(Country).findOneOrFail(id);
 			res.json(country);
 		} catch (error) {
 			// En caso contrario, envio un error.
@@ -99,7 +89,7 @@ export default class CountryController {
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(409).json({
-				message: 'Error, el pais ya esta en uso.',
+				message: 'Error, ya existe un pais con estos datos.',
 			});
 		}
 

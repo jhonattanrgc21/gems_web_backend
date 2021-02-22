@@ -9,53 +9,24 @@ import User from '../database/entities/user.entity';
 export default class ProjectController {
 	static getAll = async (req: Request, res: Response) => {
 		let projects;
-		try {
-			// Verifico si existen proyectos
-			projects = await getRepository(Project).find({
-				select: ['name'],
-			});
-		} catch (error) {
-			// En caso contrario, envio un error.
-			return res.status(404).json({
-				message: 'Algo salio mal.',
-			});
-		}
-
-		if (projects.length)
-			// Si hay proyectos, devuelvo sus nombres
-			res.json(projects);
-		else
-			// En caso contrario, envio un error.
-			return res.status(404).json({
-				message: 'Error, no existen proyectos.',
-			});
-	};
-
-	static getAllUser = async (req: Request, res: Response) => {
-		let projects;
 		let { id } = res.locals.jwtPayload;
-		const user = await getRepository(User).findOne(id);
-		try {
-			// Verifico si existen proyectos
-			projects = await getRepository(Project).find({
-				select:['name'],
-				where: { user },
-				relations: ['user'],
-			});
-		} catch (error) {
-			// En caso contrario, envio un error.
-			return res.status(404).json({
-				message: 'Algo salio mal.',
-			});
-		}
 
-		if (projects.length)
+		const user = await getRepository(User).findOne(id);
+		// Verifico si existen proyectos
+		projects = await getRepository(Project).find({
+			where: { user },
+			//relations: ['user'],
+		});
+
+		if (projects.length){
 			// Si existen proyectos, devuelvo sus datos
 			res.json(projects);
+
+		}
 		else
 			// En caso contrario, envio un error.
 			return res.status(404).json({
-				message: 'Error, no existen proyectos.',
+				message: 'Error, no existen proyectos registrados.',
 			});
 	};
 
@@ -64,13 +35,14 @@ export default class ProjectController {
 		try {
 			// Si existe el proyecto, devuelvo su nombre.
 			const project = await getRepository(Project).findOneOrFail(id, {
-				select: ['name'],
+				relations: ['user'],
 			});
+			delete project.user.password;
 			res.json(project);
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(404).json({
-				message: 'Error, el proyecto no existe.',
+				message: 'Error, este proyecto no existe.',
 			});
 		}
 	};
@@ -86,20 +58,13 @@ export default class ProjectController {
 				.json({ message: 'Este campo es requerido.' });
 
 		let project = new Project();
-		let user: User;
+
 		project.name = name;
 
-		try {
-			// Buscar al usuario correspodiente
-			user = await getRepository(User).findOneOrFail(id);
-		} catch (error) {
-			// En caso contrario, envio un error.
-			return res.status(401).json({
-				message: 'Error, el usuario no existe.',
-			});
-		}
+		// Asocio al usuario correspondiente
+		//project.user = await getRepository(User).findOne(id);
 
-		project.user = user;
+		project.user = <any>{id};
 
 		try {
 			// Si no hay errores, guardo el registro de proyectos
@@ -133,12 +98,12 @@ export default class ProjectController {
 		}
 
 		try {
-			// Si no hay errores, guardo el registro de Usuario
+			// Si no hay errores, guardo el registro del proyecto
 			await getRepository(Project).save(project);
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(409).json({
-				message: 'Error, el proyecto ya esta en uso.',
+				message: 'Error, ya existe un proyecto con este nombre.',
 			});
 		}
 

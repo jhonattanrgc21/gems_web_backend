@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
+import {
+	CreateUserInterface,
+	UpdateUserInterface,
+} from '../app/interfaces/user.interface';
 import User from '../database/entities/user.entity';
-import Country from '../database/entities/country.entity';
 
 // ======================================
 //			User Controller
@@ -9,24 +12,17 @@ import Country from '../database/entities/country.entity';
 export default class UserController {
 	static getAll = async (req: Request, res: Response) => {
 		let users;
-
-		try {
-			// Verifico si existen usuarios
-			users = await getRepository(User).find({
-				select: [
-					'id',
-					'email',
-					'username',
-					'first_name',
-					'last_name'
-				]
-			});
-		} catch (e) {
-			// En caso contrario, envio un error.
-			return res.status(404).json({
-				message: 'Algo salio mal.',
-			});
-		}
+		users = await getRepository(User).find({
+			select: [
+				'id',
+				'email',
+				'username',
+				'first_name',
+				'last_name',
+				'profesionalID',
+			],
+			relations: ['country'],
+		});
 
 		if (users.length)
 			// Si existen usuarios, devuelvo sus datos
@@ -34,7 +30,7 @@ export default class UserController {
 		else
 			// En caso contrario, envio un error.
 			return res.status(404).json({
-				message: 'Error, no existen usuarios.',
+				message: 'Error, no existen usuarios registrados.',
 			});
 	};
 
@@ -43,80 +39,74 @@ export default class UserController {
 		try {
 			// Si existe el usuario, devuelvo sus datos.
 			const user = await getRepository(User).findOneOrFail(id, {
-				select: [
-					'email',
-					'username',
-					'first_name',
-					'last_name',
-					'phone',
-					'address',
-					'profesionalID',
-					'country'
-				],
 				relations: ['country'],
 			});
+			delete user.password;
 			res.json(user);
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(404).json({
-				message: 'Error, el usuario no existe.',
+				message: 'Error, este usuario no existe.',
 			});
 		}
 	};
 
 	static newUser = async (req: Request, res: Response) => {
-		const {
-			username,
-			email,
-			password,
-			first_name,
-			last_name,
-			country,
-			phone,
-			address,
-			profesionalID,
-		} = req.body;
+		const input: CreateUserInterface = req.body;
+		let user;
 
 		// Validando que vienen datos del Front-End
-		if (!(username && email && password && first_name && last_name && profesionalID))
+		if (
+			!(
+				input.username &&
+				input.email &&
+				input.password &&
+				input.first_name &&
+				input.last_name &&
+				input.profesionalID
+			)
+		)
 			return res
 				.status(400)
 				.json({ message: 'Todos los campos son requeridos.' });
 
-		let user = new User();
+		// Validando por username
+		user = await getRepository(User).findOne(input.username);
+		if (user)
+			return res.status(409).json({
+				message: 'Error, ya existe un usuario con este username.',
+			});
 
-		user.username = username;
-		user.email = email;
-		user.password = password;
-		user.first_name = first_name;
-		user.last_name = last_name;
-		user.profesionalID = profesionalID;
-		user.phone = phone;
-		user.address = address;
+		// Validando por email
+		user = await getRepository(User).findOne(input.email);
+		if (user)
+			return res.status(409).json({
+				message: 'Error, ya existe un usuario con este email.',
+			});
 
-		if (country) {
-			let pais: Country;
-			try {
-				// Verificar si el pais existe
-				pais = await getRepository(Country).findOneOrFail(country);
-			} catch (error) {
-				// En caso contrario, envio un error.
-				return res.status(401).json({
-					message: 'Error, este pais no esta registrado..',
-				});
-			}
-			user.country = pais;
-		}
+		// Validando por profesionalID
+		user = await getRepository(User).findOne(input.profesionalID);
+		if (user)
+			return res.status(409).json({
+				message: 'Error, ya existe un usuario con este profesionalID.',
+			});
 
+		let entity = new User();
+		entity.username = input.username;
+		entity.email = input.email;
+		entity.password = input.password;
+		entity.first_name = input.first_name;
+		entity.last_name = input.last_name;
+		entity.profesionalID = input.profesionalID;
 
 		try {
 			// Si no hay errores, guardo el registro de Usuario
-			user.encryptPassword();
-			await getRepository(User).save(user);
+			entity.encryptPassword();
+			await getRepository(User).save(entity);
 		} catch (error) {
 			// En caso contrario, envio un error.
-			return res.status(409).json({
-				message: 'Error, ya existe un usuario con este email.',
+			return res.status(404).json({
+				message: 'Algo salio mal.',
 			});
 		}
 
@@ -127,45 +117,27 @@ export default class UserController {
 
 	static editUser = async (req: Request, res: Response) => {
 		const { id } = req.params;
-		const {
-			email,
-			first_name,
-			last_name,
-			phone,
-			address,
-			profesionalID,
-			country,
-		} = req.body;
+		const input: UpdateUserInterface = req.body;
+		let entity: User;
 
-		let user: User;
 		try {
 			// Si existe el usuario, actualizo sus datos.
-			user = await getRepository(User).findOneOrFail(id);
-			if (email) user.email = email;
+			entity = await getRepository(User).findOneOrFail(id);
 
-			if (first_name) user.first_name = first_name;
+			entity.first_name = input.first_name
+				? input.first_name
+				: entity.first_name;
 
-			if (last_name) user.last_name = last_name;
+			entity.last_name = input.last_name
+				? input.last_name
+				: entity.last_name;
 
-			if (phone) user.phone = phone;
-
-			if (address) user.address = address;
-
-			user.profesionalID = profesionalID;
-
-			if (country) {
-				let pais: Country;
-				try {
-					// Verificar si el pais existe
-					pais = await getRepository(Country).findOneOrFail(country);
-				} catch (error) {
-					// En caso contrario, envio un error.
-					return res.status(401).json({
-						message: 'Error, este pais no esta registrado..',
-					});
-				}
-				user.country = pais;
-			}
+			entity.phone = input.phone ? input.phone : entity.phone;
+			entity.address = input.address ? input.address : entity.address;
+			entity.profesionalID = input.profesionalID
+				? input.profesionalID
+				: entity.profesionalID;
+			entity.country = input.country ? input.country : entity.country;
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(404).json({
@@ -175,11 +147,11 @@ export default class UserController {
 
 		try {
 			// Si no hay errores, guardo el registro de Usuario
-			await getRepository(User).save(user);
-		} catch (error) {
+			await getRepository(User).save(entity);
+		} catch (error){
 			// En caso contrario, envio un error.
 			return res.status(409).json({
-				message: 'Error, el usuario ya esta en uso.',
+				message: 'Error, ya existe un usuario con este profesionalID.',
 			});
 		}
 

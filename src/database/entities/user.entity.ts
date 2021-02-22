@@ -13,14 +13,13 @@ import {
 import bcrypt from 'bcryptjs';
 import Project from './project.entity';
 import Country from './country.entity';
-import Report from './report.entity';
 
 // ======================================
 //		User Entity - SQL
 // ======================================
-@Entity('user')
+@Entity('users')
 export default class User extends BaseEntity {
-	@PrimaryGeneratedColumn()
+	@PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
 	public id!: string;
 
 	@Index('user_username_unique', { unique: true })
@@ -79,29 +78,32 @@ export default class User extends BaseEntity {
 	})
 	public profesionalID!: number;
 
-	@CreateDateColumn({ type: 'timestamp', nullable: true })
-	public created_at?: string;
-
-	@UpdateDateColumn({ type: 'timestamp', nullable: true })
-	public updated_at?: string;
-
-
 	// ======================================
 	//			RelationShips
 	// ======================================
 
-	// Un usuario puede publicar Muchos proyectos
+	// Un usuario realiza Muchos proyectos
 	@OneToMany(() => Project, (project: Project) => project.user)
 	public projects?: Project[];
 
-	// Un usuario puede generar Muchos reportes
-	@OneToMany(() => Report, (report: Report) => report.user)
-	public reports?: Report[];
-
-	// Muchos usuarios pertenecen a un pais
+	// Muchos usuarios viven en un pais
 	@ManyToOne(() => Country, (country: Country) => country.users)
 	@JoinColumn({ name: 'country' })
 	public country?: Country;
+
+	@CreateDateColumn({
+		type: 'timestamp',
+		nullable: true,
+		select: false,
+	})
+	public created_at?: string;
+
+	@UpdateDateColumn({
+		type: 'timestamp',
+		nullable: true,
+		select: false,
+	})
+	public updated_at?: string;
 
 	// ======================================
 	//			Encrypt Password

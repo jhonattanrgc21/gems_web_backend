@@ -16,7 +16,7 @@ import { checkJwt } from '../app/middlewares/auth.middleware';
 const routes = Router();
 
 // Obtener todos los proyectos
-routes.get('/', [checkJwt], ProjectController.getAllUser);
+routes.get('/', [checkJwt], ProjectController.getAll);
 
 // Obtener un solo proyecto
 routes.get('/:id',[checkJwt], ProjectController.getById);
