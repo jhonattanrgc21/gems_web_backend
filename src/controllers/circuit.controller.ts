@@ -84,6 +84,7 @@ export default class CircuitController {
 			circuit.pipe_diameter = input.pipe_diameter;
 			circuit.protection_device = input.protection_device;
 			circuit.voltaje_drop = input.voltaje_drop;
+			circuit.board_padre = input.board_padre;
 		}
 		try {
 			// Si no hay errores, guardo el registro
