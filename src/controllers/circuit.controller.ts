@@ -24,7 +24,7 @@ export default class CircuitController {
 			return res.status(404).json({
 				message: 'Error, no existen circuitos registrados.',
 			});
-	
+
 	};
 
 	static listForm = (req: Request, res: Response) => {
