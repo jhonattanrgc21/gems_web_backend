@@ -75,8 +75,9 @@ export default class User extends BaseEntity {
 	@Column({
 		type: 'bigint',
 		unsigned: true,
+		nullable: true,
 	})
-	public profesionalID!: number;
+	public profesionalID?: number;
 
 	// ======================================
 	//			RelationShips
@@ -88,7 +89,7 @@ export default class User extends BaseEntity {
 
 	// Muchos usuarios viven en un pais
 	@ManyToOne(() => Country, (country: Country) => country.users)
-	@JoinColumn({ name: 'country' })
+	@JoinColumn({ name: 'country_id' })
 	public country?: Country;
 
 	@CreateDateColumn({

@@ -58,7 +58,7 @@ export default class Circuit extends BaseEntity {
 	})
 	public voltaje_drop?: number;
 
-	
+
 	// ======================================
 	//			RelationShips
 	// ======================================
@@ -66,8 +66,8 @@ export default class Circuit extends BaseEntity {
 	// Muchos circuitos son contenidos por un tablero
 	@ManyToOne(() => Board, (board_padre: Board) => board_padre.circuits)
 	@JoinColumn({ name: 'board_padre_id' })
-	public board_padre?: Board;
-	
+	public board_padre!: Board;
+
 	// Un circuito puede ser un tablero
 	@OneToOne(() => Board)
 	@JoinColumn({ name: 'board_hijo_id' })
@@ -79,7 +79,7 @@ export default class Circuit extends BaseEntity {
 		select: false,
 	})
 	public created_at?: string;
-	
+
 	@UpdateDateColumn({
 		type: 'timestamp',
 		nullable: true,

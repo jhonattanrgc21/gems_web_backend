@@ -31,8 +31,8 @@ export default class Board extends BaseEntity {
 	// Muchos tableros son de un proyecto
 	@ManyToOne(() => Project, (project: Project) => project.boards)
 	@JoinColumn({ name: 'project_id' })
-	public project?: Project;
-	
+	public project!: Project;
+
 	// Un tablero contiene muchos cirtuitos
 	@OneToMany(() => Circuit, (circuits: Circuit) => circuits.board_padre)
 	public circuits?: Circuit[];

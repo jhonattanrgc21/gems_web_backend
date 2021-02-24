@@ -62,8 +62,7 @@ export default class UserController {
 				input.email &&
 				input.password &&
 				input.first_name &&
-				input.last_name &&
-				input.profesionalID
+				input.last_name
 			)
 		)
 			return res
@@ -84,12 +83,14 @@ export default class UserController {
 				message: 'Error, ya existe un usuario con este email.',
 			});
 
-		// Validando por profesionalID
-		user = await getRepository(User).findOne(input.profesionalID);
-		if (user)
-			return res.status(409).json({
-				message: 'Error, ya existe un usuario con este profesionalID.',
-			});
+		if(input.profesionalID){
+			// Validando por profesionalID
+			user = await getRepository(User).findOne(input.profesionalID);
+			if (user)
+				return res.status(409).json({
+					message: 'Error, ya existe un usuario con este profesionalID.',
+				});
+		}
 
 		let entity = new User();
 		entity.username = input.username;
@@ -97,7 +98,7 @@ export default class UserController {
 		entity.password = input.password;
 		entity.first_name = input.first_name;
 		entity.last_name = input.last_name;
-		entity.profesionalID = input.profesionalID;
+		entity.profesionalID = input.profesionalID? input.profesionalID : null;
 
 		try {
 			// Si no hay errores, guardo el registro de Usuario

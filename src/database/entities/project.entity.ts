@@ -25,15 +25,15 @@ export default class Project extends BaseEntity {
 	@Column({ type: 'varchar', length: 191, comment: 'Nombre del Proyecto' })
 	public name!: string;
 
-	
+
 	// ======================================
 	//			RelationShips
 	// ======================================
 	// Muchos proyectos son realizados por un usuario
 	@ManyToOne(() => User, (user: User) => user.projects)
 	@JoinColumn({ name: 'user_id' })
-	public user?: User;
-	
+	public user!: User;
+
 	// Un proyecto tiene muchos tableros
 	@OneToMany(() => Board, (boards: Board) => boards.project)
 	public boards?: Board[];
@@ -44,7 +44,7 @@ export default class Project extends BaseEntity {
 		select: false,
 	})
 	public created_at?: string;
-	
+
 	@UpdateDateColumn({
 		type: 'timestamp',
 		nullable: true,

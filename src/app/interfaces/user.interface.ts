@@ -9,7 +9,7 @@ export interface CreateUserInterface {
 	password: string;
 	first_name: string;
 	last_name: string;
-	profesionalID: number;
+	profesionalID?: number;
 }
 
 export interface UpdateUserInterface {
