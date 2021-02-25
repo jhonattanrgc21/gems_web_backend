@@ -125,6 +125,16 @@ export default class UserController {
 			// Si existe el usuario, actualizo sus datos.
 			entity = await getRepository(User).findOneOrFail(id);
 
+			// Validando por email
+			if(input.email){
+				const user = await getRepository(User).findOne(input.email);
+				if (user)
+					return res.status(409).json({
+						message: 'Error, ya existe un usuario con este email.',
+					});
+				entity.email = input.email;
+			}
+
 			entity.first_name = input.first_name
 				? input.first_name
 				: entity.first_name;

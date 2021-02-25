@@ -13,6 +13,7 @@ export interface CreateUserInterface {
 }
 
 export interface UpdateUserInterface {
+	email?: string;
 	first_name?: string;
 	last_name?: string;
 	phone?: string;
