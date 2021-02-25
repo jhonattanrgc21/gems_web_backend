@@ -8,5 +8,4 @@ export interface CreateBoardInterface{
 
 export interface UpdateBoardInterface{
 	name?: string;
-	circuits?: Circuit;
 }

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
-import Project from '../database/entities/project.entity';
+
 import Board from '../database/entities/board.entity';
 import {
 	CreateBoardInterface,
@@ -8,7 +8,7 @@ import {
 } from '../app/interfaces/board.interface';
 
 // ======================================
-//			Report Controller
+//			Board Controller
 // ======================================
 export default class BoardController {
 	static getAll = async (req: Request, res: Response) => {
@@ -16,7 +16,7 @@ export default class BoardController {
 
 		// Verifico si existen tableros
 		boards = await getRepository(Board).find({
-			relations: ['project'],
+			relations: ['project', 'circuits'],
 		});
 
 		if (boards.length)
@@ -34,7 +34,7 @@ export default class BoardController {
 		try {
 			// Si existe el tablero, devuelvo sus datos.
 			const board = await getRepository(Board).findOneOrFail(id, {
-				relations: ['project'],
+				relations: ['project', 'circuits'],
 			});
 			res.json(board);
 		} catch (error) {
@@ -89,7 +89,7 @@ export default class BoardController {
 
 		await getRepository(Board).save(board);
 
-		return res.status(201).json('Tablero actualizado con exito.');
+		return res.status(201).json({ message: 'Tablero actualizado con exito.'});
 	};
 
 	static deleteBoard = async (req: Request, res: Response) => {

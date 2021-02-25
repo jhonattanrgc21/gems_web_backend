@@ -8,8 +8,10 @@ import {
 	PrimaryGeneratedColumn,
 	BaseEntity,
 	OneToOne,
+	OneToMany,
 } from 'typeorm';
 import Board from './board.entity';
+import Report from './report.entity';
 
 // ======================================
 //		Circuit Entity - SQL
@@ -19,50 +21,12 @@ export default class Circuit extends BaseEntity {
 	@PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
 	public id!: string;
 
-	@Column({
-		type: 'bigint',
-		unsigned: true,
-		default: 0,
-	})
-	public current?: number;
-
-	@Column({
-		type: 'bigint',
-		unsigned: true,
-		comment: 'Anchura del cable.',
-		default: 0,
-	})
-	public cable_width?: number;
-
-	@Column({
-		type: 'bigint',
-		unsigned: true,
-		comment: 'Diametro de la tuberia.',
-		default: 0,
-	})
-	public pipe_diameter?: number;
-
-	@Column({
-		type: 'bigint',
-		unsigned: true,
-		comment: 'Dispositivo de proteccion.',
-		default: 0,
-	})
-	public protection_device?: number;
-
-	@Column({
-		type: 'bigint',
-		unsigned: true,
-		comment: 'Caida de voltaje.',
-		default: 0,
-	})
-	public voltaje_drop?: number;
-
+	@Column({ type: 'varchar', length: 191, comment: 'Nombre del Circuito' })
+	public name!: string;
 
 	// ======================================
 	//			RelationShips
 	// ======================================
-
 	// Muchos circuitos son contenidos por un tablero
 	@ManyToOne(() => Board, (board_padre: Board) => board_padre.circuits)
 	@JoinColumn({ name: 'board_padre_id' })
@@ -72,6 +36,10 @@ export default class Circuit extends BaseEntity {
 	@OneToOne(() => Board)
 	@JoinColumn({ name: 'board_hijo_id' })
 	public board_hijo?: Board;
+
+	// Un circuito puede generar muchos reportes
+	@OneToMany(() => Report, (reports: Report) => reports.circuit)
+	public reports?: Report[];
 
 	@CreateDateColumn({
 		type: 'timestamp',

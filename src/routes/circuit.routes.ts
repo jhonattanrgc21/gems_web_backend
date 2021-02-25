@@ -18,9 +18,6 @@ const routes = Router();
 // Obtener todos los circuitos
 routes.get('/', [checkJwt], CircuitController.getAll);
 
-// Obtener la lista de valores previos a la insercion del registro
-routes.get('/listForm', [checkJwt], CircuitController.listForm);
-
 // Obtener un solo circuito
 routes.get('/:id', [checkJwt], CircuitController.getById);
 

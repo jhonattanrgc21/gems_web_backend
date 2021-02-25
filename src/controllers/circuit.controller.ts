@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
+
 import Circuit from '../database/entities/circuit.entity';
-import Board from '../database/entities/board.entity';
+
 import { CircuitInterface } from '../app/interfaces/circuit.interface';
 
 // ======================================
-//			Report Controller
+//			Circuit Controller
 // ======================================
 export default class CircuitController {
 	static getAll = async (req: Request, res: Response) => {
@@ -13,11 +14,11 @@ export default class CircuitController {
 
 		// Verifico si existen circuitos
 		circuits = await getRepository(Circuit).find({
-			relations: ['board_padre', 'board_hijo'],
+			relations: ['board_padre', 'board_hijo', 'reports'],
 		});
 
 		if (circuits.length)
-			// Si hay reportes, devuelvo sus nombres
+			// Si hay circuitos, devuelvo sus nombres
 			res.json(circuits);
 		// En caso contrario, envio un error.
 		else
@@ -27,26 +28,12 @@ export default class CircuitController {
 
 	};
 
-	static listForm = (req: Request, res: Response) => {
-		const calculos = {
-			current: (Math.floor(Math.random() * 2000) + 1).toString(),
-			cable_width: (Math.floor(Math.random() * 2000) + 1).toString(),
-			pipe_diameter: (Math.floor(Math.random() * 2000) + 1).toString(),
-			protection_device: (
-				Math.floor(Math.random() * 2000) + 1
-			).toString(),
-			voltaje_drop: (Math.floor(Math.random() * 2000) + 1).toString(),
-		};
-
-		return res.json(calculos);
-	};
-
 	static getById = async (req: Request, res: Response) => {
 		const { id } = req.params;
 		try {
-			// Si existe el circuit, devuelvo sus datos.
+			// Si existe el circuito, devuelvo sus datos.
 			const report = await getRepository(Circuit).findOneOrFail(id, {
-				relations: ['board_padre', 'board_hijo'],
+				relations: ['board_padre', 'board_hijo', 'reports'],
 			});
 			res.json(report);
 		} catch (error) {
@@ -66,26 +53,15 @@ export default class CircuitController {
 			circuit.board_hijo = input.board_hijo;
 		} else {
 			// Validando que vienen datos del Front-End
-			if (
-				!(
-					input.current &&
-					input.cable_width &&
-					input.pipe_diameter &&
-					input.protection_device &&
-					input.voltaje_drop
-				)
-			)
+			if (!input.name)
 				return res
 					.status(400)
-					.json({ message: 'Todos los campos son requeridod.' });
+					.json({ message: 'Error, el nombre es requerido.' });
 
-			circuit.current = input.current;
-			circuit.cable_width = input.cable_width;
-			circuit.pipe_diameter = input.pipe_diameter;
-			circuit.protection_device = input.protection_device;
-			circuit.voltaje_drop = input.voltaje_drop;
+			circuit.name = input.name;
 			circuit.board_padre = input.board_padre;
 		}
+
 		try {
 			// Si no hay errores, guardo el registro
 			await getRepository(Circuit).save(circuit);
@@ -108,11 +84,7 @@ export default class CircuitController {
 		try {
 			// Si existe el circuito, actualizo sus datos.
 			circuit = await getRepository(Circuit).findOneOrFail(id);
-			circuit.current = input.current;
-			circuit.cable_width = input.cable_width;
-			circuit.pipe_diameter = input.pipe_diameter;
-			circuit.protection_device = input.protection_device;
-			circuit.voltaje_drop = input.voltaje_drop;
+			circuit.name = input.name? input.name : circuit.name;
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(404).json({
@@ -121,7 +93,7 @@ export default class CircuitController {
 		}
 
 		try {
-			// Si no hay errores, guardo el registro de Usuario
+			// Si no hay errores, guardo el registro del circuito
 			await getRepository(Circuit).save(circuit);
 		} catch (error) {
 			// En caso contrario, envio un error.
@@ -130,7 +102,7 @@ export default class CircuitController {
 			});
 		}
 
-		return res.status(201).json('Circuito actualizado con exito.');
+		return res.status(201).json({ message: 'Circuito actualizado con exito.'});
 	};
 
 	static deleteCircuit = async (req: Request, res: Response) => {
@@ -149,7 +121,7 @@ export default class CircuitController {
 		await getRepository(Circuit).delete(id);
 
 		res.status(201).json({
-			message: 'Reporte eliminado con exito.',
+			message: 'Circuito eliminado con exito.',
 		});
 	};
 }

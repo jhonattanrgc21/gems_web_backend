@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
+
 import Project from '../database/entities/project.entity';
 import User from '../database/entities/user.entity';
 
@@ -15,7 +16,7 @@ export default class ProjectController {
 		// Verifico si existen proyectos
 		projects = await getRepository(Project).find({
 			where: { user },
-			//relations: ['user'],
+			relations: ['boards'],
 		});
 
 		if (projects.length){
@@ -32,12 +33,15 @@ export default class ProjectController {
 
 	static getById = async (req: Request, res: Response) => {
 		const { id } = req.params;
+		const { id_user } = res.locals.jwtPayload;
+		const user = await getRepository(User).findOne(id_user);
+
 		try {
 			// Si existe el proyecto, devuelvo su nombre.
 			const project = await getRepository(Project).findOneOrFail(id, {
-				relations: ['user'],
+				where: [user],
+				relations: ['boards'],
 			});
-			delete project.user.password;
 			res.json(project);
 		} catch (error) {
 			// En caso contrario, envio un error.
