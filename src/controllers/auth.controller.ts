@@ -12,16 +12,23 @@ export default class AuthController {
 
 		// Validando los datos que vienen del Front-End
 		if (!(email && password))
-			res.status(400).json({ message: 'Email y Password requerido.' });
+			res.status(400).json({
+				message: 'Todos los datos son requeridos.',
+			});
 
 		let user: User;
 		try {
 			// Validando el email
-			user = await getRepository(User).findOneOrFail({
-				where: { email },
-			});
+			user = await getRepository(User).findOneOrFail({ email });
 		} catch (error) {
-			res.status(400).json({ message: 'Email icorrecto.' });
+			try {
+				// Validando el username
+				user = await getRepository(User).findOneOrFail({ username: email})
+			} catch (error) {
+				res.status(400).json({
+					message: 'Email o username icorrecto.',
+				});
+			}
 		}
 
 		// Validando la contraseña
