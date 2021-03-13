@@ -19,6 +19,6 @@ routes.use('/user', user);
 routes.use('/project', project);
 routes.use('/board', board);
 routes.use('/circuit', circuit);
-routes.use('/report', circuit);
+routes.use('/report', report);
 
 export default routes;

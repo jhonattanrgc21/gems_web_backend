@@ -129,7 +129,7 @@ export default class CircuitController {
 		return res.status(201).json({message: 'Reporte actualizado con exito.'});
 	};
 
-	static deleteReportt = async (req: Request, res: Response) => {
+	static deleteReport = async (req: Request, res: Response) => {
 		const { id } = req.params;
 
 		try {
