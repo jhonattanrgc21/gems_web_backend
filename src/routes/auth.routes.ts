@@ -17,6 +17,4 @@ const routes = Router()
 
 routes.post('/login', AuthController.login);
 routes.post('/change-password', [checkJwt], AuthController.changePassword);
-routes.post('/logaut', [checkJwt], AuthController.logout);
-
 export default routes;

@@ -25,16 +25,5 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
 
 	res.setHeader('token', newToken);
 
-	/// creating Cookie in Client machine for Auth
-	res.cookie('jwt', newToken, {
-		expires: new Date(Date.now() + (process.env.SECRET_HEY || 'JG-DEV')),
-		secure: true,
-		httpOnly: true,
-	});
-	/// creating Cookie of Logged user Details in claint machine
-	res.cookie('user', jwtPayload, {
-		expires: new Date(Date.now() + (process.env.SECRET_HEY || 'JG-DEV')),
-	});
-
 	next();
 }

@@ -79,9 +79,4 @@ export default class AuthController {
 
 		res.json({ message: 'Contraseña actualizada con exito.' });
 	};
-
-	static logout = (req: Request, res: Response) => {
-		res.clearCookie('jwt');
-		res.clearCookie('user');
-	};
 }
