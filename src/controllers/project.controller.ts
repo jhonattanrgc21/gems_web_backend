@@ -22,7 +22,6 @@ export default class ProjectController {
 		if (projects.length){
 			// Si existen proyectos, devuelvo sus datos
 			res.json(projects);
-
 		}
 		else
 			// En caso contrario, envio un error.
@@ -39,7 +38,7 @@ export default class ProjectController {
 		try {
 			// Si existe el proyecto, devuelvo su nombre.
 			const project = await getRepository(Project).findOneOrFail(id, {
-				where: [user],
+				where: { user },
 				relations: ['boards'],
 			});
 			res.json(project);
