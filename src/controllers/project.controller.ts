@@ -19,12 +19,12 @@ export default class ProjectController {
 			relations: ['boards'],
 		});
 
-		if (projects.length){
+		if (projects.length) {
 			// Si existen proyectos, devuelvo sus datos
 			res.json(projects);
 		}
+		// En caso contrario, envio un error.
 		else
-			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, no existen proyectos registrados.',
 			});
@@ -32,17 +32,18 @@ export default class ProjectController {
 
 	static getById = async (req: Request, res: Response) => {
 		const { id } = req.params;
-		const { id_user } = res.locals.jwtPayload;
+		const id_user = res.locals.jwtPayload.id;
 		const user = await getRepository(User).findOne(id_user);
 
-		try {
-			// Si existe el proyecto, devuelvo su nombre.
-			const project = await getRepository(Project).findOneOrFail(id, {
-				where: { user },
-				relations: ['boards'],
-			});
+		const project = await getRepository(Project).findOne(id, {
+			where: { user },
+			relations: ['boards'],
+		});
+
+		if (project) {
+			// Si existe el proyecto, devuelvo sus datos.
 			res.json(project);
-		} catch (error) {
+		} else {
 			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, este proyecto no existe.',
@@ -86,15 +87,22 @@ export default class ProjectController {
 		const { id } = req.params;
 		const { name } = req.body;
 
+		const id_user = res.locals.jwtPayload.id;
+		const user = await getRepository(User).findOne(id_user);
+
 		let project: Project;
-		try {
-			// Si existe el proyecto, actualizo sus datos.
-			project = await getRepository(Project).findOneOrFail(id);
+		project = await getRepository(Project).findOne(id, {
+			where: { user },
+			relations: ['boards'],
+		});
+
+		if (project) {
+			// Si existe el proyecto, actualizo su nombre.
 			project.name = name;
-		} catch (error) {
+		} else {
 			// En caso contrario, envio un error.
 			return res.status(404).json({
-				message: 'Error, el proyecto no existe.',
+				message: 'Error, este proyecto no existe.',
 			});
 		}
 
@@ -108,15 +116,21 @@ export default class ProjectController {
 			});
 		}
 
-		return res.status(201).json('Proyecto actualizado con exito.');
+		return res.status(201).json({
+			message: 'Proyecto actualizado con exito.',
+		});
 	};
 
 	static deleteProject = async (req: Request, res: Response) => {
 		const { id } = req.params;
 
+		const id_user = res.locals.jwtPayload.id;
+		const user = await getRepository(User).findOne(id_user);
 		try {
 			// Verifico si el proyecto existe.
-			await getRepository(Project).findOneOrFail(id);
+			await getRepository(Project).findOneOrFail(id, {
+				where: { user }
+			});
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(404).json({

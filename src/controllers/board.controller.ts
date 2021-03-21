@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 
 import Board from '../database/entities/board.entity';
-import {
-	CreateBoardInterface,
-	UpdateBoardInterface,
-} from '../app/interfaces/board.interface';
+import User from '../database/entities/user.entity';
+import Project from '../database/entities/project.entity';
+
+import { BoardInterface } from '../app/interfaces/board.interface';
 
 // ======================================
 //			Board Controller
@@ -31,6 +31,7 @@ export default class BoardController {
 
 	static getById = async (req: Request, res: Response) => {
 		const { id } = req.params;
+
 		try {
 			// Si existe el tablero, devuelvo sus datos.
 			const board = await getRepository(Board).findOneOrFail(id, {
@@ -46,15 +47,22 @@ export default class BoardController {
 	};
 
 	static newBoard = async (req: Request, res: Response) => {
-		const input: CreateBoardInterface = req.body;
+		const input: BoardInterface = req.body;
 
-		// Validando que vienen datos del Front-End
-		if (!input.name)
-			return res
-				.status(400)
-				.json({ message: 'Todos el nombre es requeridod.' });
+		const id_user = res.locals.jwtPayload.id;
+		const user = await getRepository(User).findOne(id_user);
+		const project = await getRepository(Project).findOne(input.project.id, {
+			where: { user },
+			relations: ['boards'],
+		});
 
-		if (input.project) {
+		if (project) {
+			// Validando que vienen datos del Front-End
+			if (!input.name)
+				return res
+					.status(400)
+					.json({ message: 'El nombre es requeridod.' });
+
 			const board = new Board();
 			board.name = input.name;
 			board.project = input.project;
@@ -73,23 +81,38 @@ export default class BoardController {
 
 	static editBoard = async (req: Request, res: Response) => {
 		const { id } = req.params;
-		const input: UpdateBoardInterface = req.body;
+		const input: BoardInterface = req.body;
+		const id_user = res.locals.jwtPayload.id;
 
-		let board: Board;
-		try {
-			// Si existe el tablero, actualizo sus datos.
-			board = await getRepository(Board).findOneOrFail(id);
-			board.name = input.name ? input.name : board.name;
-		} catch (error) {
-			// En caso contrario, envio un error.
-			return res.status(404).json({
-				message: 'Error, el tablero no esta registrado.',
+		const user = await getRepository(User).findOne(id_user);
+		const project = await getRepository(Project).findOne(input.project.id, {
+			where: { user },
+			relations: ['boards'],
+		});
+
+		if (project) {
+			let board: Board;
+			try {
+				// Si existe el tablero, actualizo sus datos.
+				board = await getRepository(Board).findOneOrFail(id);
+				board.name = input.name ? input.name : board.name;
+			} catch (error) {
+				// En caso contrario, envio un error.
+				return res.status(404).json({
+					message: 'Error, el tablero no esta registrado.',
+				});
+			}
+
+			await getRepository(Board).save(board);
+
+			return res
+				.status(201)
+				.json({ message: 'Tablero actualizado con exito.' });
+		} else {
+			return res.status(401).json({
+				message: 'Error, no se encontro el proyecto asociado.',
 			});
 		}
-
-		await getRepository(Board).save(board);
-
-		return res.status(201).json({ message: 'Tablero actualizado con exito.'});
 	};
 
 	static deleteBoard = async (req: Request, res: Response) => {

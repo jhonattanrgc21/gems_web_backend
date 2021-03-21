@@ -1,5 +1,4 @@
 import Board from '../../database/entities/board.entity';
-import Report from '../../database/entities/report.entity';
 
 // ======================================
 //			Circuit Interface
