@@ -79,6 +79,13 @@ export default class User extends BaseEntity {
 	})
 	public profesionalID?: number;
 
+	@Column({
+		type: 'text',
+		comment: 'Reseteo de token.',
+		nullable: true,
+	})
+	public resetToken?: string;
+
 	// ======================================
 	//			RelationShips
 	// ======================================

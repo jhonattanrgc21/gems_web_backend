@@ -19,7 +19,7 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction) => {
 
 	const newToken = jwt.sign(
 		{ id, email },
-		process.env.SECRET_HEY || 'JG-DEV',
+		process.env.SECRET_KEY || 'JG-DEV',
 		{ expiresIn: '1h' },
 	);
 
