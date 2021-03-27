@@ -113,7 +113,7 @@ export default class AuthController {
 			{ expiresIn: '10m' },
 		);
 
-		let verificacionLink = `http://localhost:4000/auth/new-password/${token}`;
+		let verificacionLink = `http://localhost:3004/change/${token}`;
 		user.resetToken = token;
 
 		/*
