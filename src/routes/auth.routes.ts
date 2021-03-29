@@ -15,6 +15,15 @@ import { checkJwt } from '../app/middlewares/auth.middleware';
 // ======================================
 const routes = Router()
 
+// Registrar usuarios
+routes.post('/register', AuthController.register);
+
+// Confirmar registros de usuarios
+routes.post('/verifyUser', AuthController.verifyUser);
+
+// Reenviar correo de verificacion
+routes.post('/resend-verification', AuthController.resendVerification);
+
 // Iniciar sesion
 routes.post('/login', AuthController.login);
 

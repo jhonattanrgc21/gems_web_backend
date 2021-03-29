@@ -80,6 +80,21 @@ export default class User extends BaseEntity {
 	public profesionalID?: number;
 
 	@Column({
+		type: 'boolean',
+		comment: 'Estatus para el registro.',
+		default: false,
+		nullable: true,
+	})
+	public status?: boolean;
+
+	@Column({
+		type: 'text',
+		comment: 'Confirmacion de token.',
+		nullable: true,
+	})
+	public confirmToken?: string;
+
+	@Column({
 		type: 'text',
 		comment: 'Reseteo de token.',
 		nullable: true,
