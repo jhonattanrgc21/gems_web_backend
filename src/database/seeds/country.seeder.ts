@@ -1,6 +1,6 @@
 import { Connection } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
-import Country from '../entities/country.entity';
+import Country from '../entities/countries.entity';
 
 // ======================================
 //			Country Seeder

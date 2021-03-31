@@ -1,4 +1,4 @@
-import Board from '../../database/entities/board.entity';
+import Board from '../../database/entities/boards.entity';
 
 // ======================================
 //			Circuit Interface
@@ -6,5 +6,4 @@ import Board from '../../database/entities/board.entity';
 export interface CircuitInterface {
 	name: string
 	board_padre: Board;
-	board_hijo?: Board;
 }

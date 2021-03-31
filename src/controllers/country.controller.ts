@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
-import Country from '../database/entities/country.entity';
+import Country from '../database/entities/countries.entity';
 
 // ======================================
 //			Country Controller

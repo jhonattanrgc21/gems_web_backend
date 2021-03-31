@@ -2,42 +2,37 @@ import {
 	Entity,
 	Column,
 	OneToMany,
-	BaseEntity,
-	CreateDateColumn,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-import User from './user.entity';
+import User from './users.entity';
+import UuidEntity from './uuid.entity';
 
 // ======================================
-//		Country Entity - SQL/GraphQL
+//		Country Entity - SQL
 // ======================================
 @Entity('countries')
-export default class Country extends BaseEntity {
-	@PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
-	public id!: string;
-
+export default class Country extends UuidEntity {
 	@Column({
 		type: 'varchar',
 		length: 6,
-		comment: 'Código del país.'
+		comment: 'Código del país.',
 	})
 	public code!: string;
 
 	@Column({
 		type: 'varchar',
 		length: 6,
-		comment: 'Prefijo del país.'
+		comment: 'Prefijo del país.',
 	})
 	public prefix!: string;
 
 	@Column({
 		type: 'varchar',
 		length: 100,
-		comment: 'Nombre del país.'
+		comment: 'Nombre del país.',
 	})
 	public name!: string;
 
-	
 	// ======================================
 	//			RelationShips
 	// ======================================1
@@ -45,10 +40,4 @@ export default class Country extends BaseEntity {
 	// En una ciudad viven muchos usuarios
 	@OneToMany(() => User, (user: User) => user.country)
 	public users?: User[];
-	
-	@CreateDateColumn({
-		type: 'timestamp',
-		nullable: true,
-	})
-	public created_at?: Date;
 }

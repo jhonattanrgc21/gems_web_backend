@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import jwt from 'jsonwebtoken';
-import User from '../database/entities/user.entity';
+import User from '../database/entities/users.entity';
 import { transporter } from '../config/mailer';
 
 // ======================================

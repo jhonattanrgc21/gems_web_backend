@@ -1,4 +1,4 @@
-import Circuit from '../../database/entities/circuit.entity';
+import Circuit from '../../database/entities/circuits.entity';
 
 // ======================================
 //			Report Interface

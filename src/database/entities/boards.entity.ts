@@ -1,33 +1,27 @@
 import {
-	BaseEntity,
 	Column,
-	CreateDateColumn,
 	Entity,
 	JoinColumn,
 	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn,
-	UpdateDateColumn,
 } from 'typeorm';
 
-import Circuit from './circuit.entity';
-import Project from './project.entity';
+import Circuit from './circuits.entity';
+import Project from './projects.entity';
+import UuidEntity from './uuid.entity';
 
 // ======================================
 //		Board Entity - SQL
 // ======================================
 @Entity('boards')
-export default class Board extends BaseEntity {
-	@PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
-	public id!: string;
-
+export default class Board extends UuidEntity {
 	@Column({ type: 'varchar', length: 191, comment: 'Nombre del Tablero' })
 	public name!: string;
 
 	// ======================================
 	//			RelationShips
 	// ======================================
-
 	// Muchos tableros son de un proyecto
 	@ManyToOne(() => Project, (project: Project) => project.boards)
 	@JoinColumn({ name: 'project_id' })
@@ -37,17 +31,13 @@ export default class Board extends BaseEntity {
 	@OneToMany(() => Circuit, (circuits: Circuit) => circuits.board_padre)
 	public circuits?: Circuit[];
 
-	@CreateDateColumn({
-		type: 'timestamp',
-		nullable: true,
-		select: false,
-	})
-	public created_at?: string;
+	// Un tablero contiene muchos subtableros
+	@OneToMany(() => Board, (board_hijos: Board) => board_hijos.board_padre)
+	public board_hijos?: Board[];
 
-	@UpdateDateColumn({
-		type: 'timestamp',
-		nullable: true,
-		select: false,
-	})
-	public updated_at?: string;
+	// Muchos Subtableros pertenecen a un tablero
+	@ManyToOne(() => Board, (board_padre: Board) => board_padre.board_hijos)
+	@JoinColumn({ name: 'board_padre_id'})
+	public board_padre?: Board;
+
 }

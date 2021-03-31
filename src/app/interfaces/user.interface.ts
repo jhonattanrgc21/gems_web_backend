@@ -1,4 +1,4 @@
-import Country from "../../database/entities/country.entity";
+import Country from "../../database/entities/countries.entity";
 
 // ======================================
 //			User Interface
@@ -10,6 +10,7 @@ export interface CreateUserInterface {
 	first_name: string;
 	last_name: string;
 	profesionalID?: number;
+	status?: boolean;
 }
 
 export interface UpdateUserInterface {
@@ -19,5 +20,6 @@ export interface UpdateUserInterface {
 	phone?: string;
 	address?: string;
 	profesionalID?: number;
+	status?: boolean;
 	country?: Country;
 }

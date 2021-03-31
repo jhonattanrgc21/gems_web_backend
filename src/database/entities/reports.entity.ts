@@ -3,22 +3,16 @@ import {
 	Column,
 	ManyToOne,
 	JoinColumn,
-	UpdateDateColumn,
-	CreateDateColumn,
 	PrimaryGeneratedColumn,
-	BaseEntity,
-	OneToOne,
 } from 'typeorm';
-import Circuit from './circuit.entity';
+import Circuit from './circuits.entity';
+import UuidEntity from './uuid.entity';
 
 // ======================================
 //		Report Entity - SQL
 // ======================================
 @Entity('reports')
-export default class Report extends BaseEntity {
-	@PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
-	public id!: string;
-
+export default class Report extends UuidEntity {
 	@Column({
 		type: 'bigint',
 		unsigned: true,
@@ -58,7 +52,6 @@ export default class Report extends BaseEntity {
 	})
 	public voltaje_drop?: number;
 
-
 	// ======================================
 	//			RelationShips
 	// ======================================
@@ -67,18 +60,4 @@ export default class Report extends BaseEntity {
 	@ManyToOne(() => Circuit, (circuit: Circuit) => circuit.reports)
 	@JoinColumn({ name: 'circuit_id' })
 	public circuit!: Circuit;
-
-	@CreateDateColumn({
-		type: 'timestamp',
-		nullable: true,
-		select: false,
-	})
-	public created_at?: string;
-
-	@UpdateDateColumn({
-		type: 'timestamp',
-		nullable: true,
-		select: false,
-	})
-	public updated_at?: string;
 }

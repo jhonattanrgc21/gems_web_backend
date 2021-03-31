@@ -4,7 +4,7 @@ import {
 	CreateUserInterface,
 	UpdateUserInterface,
 } from '../app/interfaces/user.interface';
-import User from '../database/entities/user.entity';
+import User from '../database/entities/users.entity';
 
 // ======================================
 //			User Controller
@@ -20,15 +20,14 @@ export default class UserController {
 				'first_name',
 				'last_name',
 				'profesionalID',
+				'status',
 			],
-			relations: ['country'],
+			relations: ['country', 'projects'],
 		});
 
-		if (users.length)
-			// Si existen usuarios, devuelvo sus datos
-			res.json(users);
+		// Si existen usuarios, devuelvo sus datos
+		if (users.length) res.json(users);
 		else
-			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, no existen usuarios registrados.',
 			});
@@ -39,12 +38,11 @@ export default class UserController {
 		try {
 			// Si existe el usuario, devuelvo sus datos.
 			const user = await getRepository(User).findOneOrFail(id, {
-				relations: ['country'],
+				relations: ['country', 'projects'],
 			});
 			delete user.password;
 			res.json(user);
 		} catch (error) {
-			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, este usuario no existe.',
 			});
@@ -55,7 +53,7 @@ export default class UserController {
 		const input: CreateUserInterface = req.body;
 		let user;
 
-		// Validando que vienen datos del Front-End
+		// Validando los datos que vienen del front
 		if (
 			!(
 				input.username &&
@@ -83,12 +81,13 @@ export default class UserController {
 				message: 'Error, ya existe un usuario con este email.',
 			});
 
-		if(input.profesionalID){
+		if (input.profesionalID) {
 			// Validando por profesionalID
 			user = await getRepository(User).findOne(input.profesionalID);
 			if (user)
 				return res.status(409).json({
-					message: 'Error, ya existe un usuario con este profesionalID.',
+					message:
+						'Error, ya existe un usuario con este profesionalID.',
 				});
 		}
 
@@ -98,7 +97,8 @@ export default class UserController {
 		entity.password = input.password;
 		entity.first_name = input.first_name;
 		entity.last_name = input.last_name;
-		entity.profesionalID = input.profesionalID? input.profesionalID : null;
+		entity.profesionalID = input.profesionalID ? input.profesionalID : null;
+		entity.status = true;
 
 		try {
 			// Si no hay errores, guardo el registro de Usuario
@@ -107,7 +107,7 @@ export default class UserController {
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(404).json({
-				message: 'Algo salio mal.',
+				message: 'Error, no se pudo guardar el registro del usuario..',
 			});
 		}
 
@@ -126,7 +126,7 @@ export default class UserController {
 			entity = await getRepository(User).findOneOrFail(id);
 
 			// Validando por email
-			if(input.email){
+			if (input.email) {
 				const user = await getRepository(User).findOne(input.email);
 				if (user)
 					return res.status(409).json({
@@ -148,25 +148,25 @@ export default class UserController {
 			entity.profesionalID = input.profesionalID
 				? input.profesionalID
 				: entity.profesionalID;
+			entity.status = input.status ? input.status : entity.status;
 			entity.country = input.country ? input.country : entity.country;
 		} catch (error) {
-			// En caso contrario, envio un error.
 			return res.status(404).json({
-				message: 'Error, el usuario no existe.',
+				message: 'Error, el usuario no esta registrado.',
 			});
 		}
 
 		try {
 			// Si no hay errores, guardo el registro de Usuario
 			await getRepository(User).save(entity);
-		} catch (error){
+		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(409).json({
 				message: 'Error, ya existe un usuario con este profesionalID.',
 			});
 		}
 
-		return res.status(201).json('Usuario actualizado con exito.');
+		res.status(201).json({ message: 'Usuario actualizado con exito.' });
 	};
 
 	static deleteUser = async (req: Request, res: Response) => {
@@ -176,7 +176,6 @@ export default class UserController {
 			// Verifico si el usuario existe.
 			await getRepository(User).findOneOrFail(id);
 		} catch (error) {
-			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, el usuario no existe.',
 			});

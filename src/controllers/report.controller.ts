@@ -1,13 +1,8 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
-
-import Report from '../database/entities/report.entity';
-
+import Report from '../database/entities/reports.entity';
 import { ReportInterface } from '../app/interfaces/report.interface';
-import {
-	tableTemperature,
-	tableCorrectionFactors,
-} from '../config/tableCalculate';
+import { tableCorrectionFactors } from '../config/tableCalculate';
 
 // ======================================
 //			Report Controller
@@ -24,7 +19,6 @@ export default class CircuitController {
 		if (reports.length)
 			// Si hay reportes, devuelvo sus datos
 			res.json(reports);
-		// En caso contrario, envio un error.
 		else
 			return res.status(404).json({
 				message: 'Error, no existen reportes registrados.',
@@ -55,11 +49,13 @@ export default class CircuitController {
 			aisolation > 3 ||
 			loadPhases < 1 ||
 			loadPhases > 3 ||
-			perPhase <= 0
+			perPhase <= 0 ||
+			temperature < 21 ||
+			temperature > 80
 		)
 			return res.status(401).json({
 				message:
-					'Error, el valor del aislamiento y las fases deben estar entre 1 y 3 y perPhase debe ser mayor a 0.',
+					'Error, el valor del aislamiento y las fases deben estar entre 1 y 3, perPhase debe ser mayor a 0 y la temperatura debe estar entre 21 y 80.',
 			});
 
 		let O95;
@@ -88,113 +84,46 @@ export default class CircuitController {
 		//Calculando el factor de temperatura
 		aisolation--;
 		let factordetemp;
-		switch (temperature) {
-			// caso 1
-			case 21:
-			case 22:
-			case 23:
-			case 24:
-			case 25:
-				factordetemp = tableCorrectionFactors[aisolation][0];
-				break;
 
-			// caso 2
-			case 26:
-			case 27:
-			case 28:
-			case 29:
-			case 30:
-				factordetemp = tableCorrectionFactors[aisolation][1];
-				break;
+		// Caso 1
+		if (temperature >= 21 && temperature <= 25)
+			factordetemp = tableCorrectionFactors[aisolation][0];
 
-			// caso 3
-			case 31:
-			case 32:
-			case 33:
-			case 34:
-			case 35:
-				factordetemp = tableCorrectionFactors[aisolation][2];
-				break;
+		// Caso 2
+		if (temperature >= 26 && temperature <= 30)
+			factordetemp = tableCorrectionFactors[aisolation][1];
 
-			// caso 4
-			case 36:
-			case 37:
-			case 38:
-			case 39:
-			case 40:
-				factordetemp = tableCorrectionFactors[aisolation][3];
-				break;
+		// Caso 3
+		if (temperature >= 31 && temperature <= 35)
+			factordetemp = tableCorrectionFactors[aisolation][2];
 
-			// caso 5
-			case 41:
-			case 42:
-			case 43:
-			case 44:
-			case 45:
-				factordetemp = tableCorrectionFactors[aisolation][4];
-				break;
+		// Caso 4
+		if (temperature >= 36 && temperature <= 40)
+			factordetemp = tableCorrectionFactors[aisolation][3];
 
-			// caso 6
-			case 46:
-			case 47:
-			case 48:
-			case 49:
-			case 50:
-				factordetemp = tableCorrectionFactors[aisolation][5];
-				break;
+		// Caso 5
+		if (temperature >= 41 && temperature <= 45)
+			factordetemp = tableCorrectionFactors[aisolation][4];
 
-			// caso 7
-			case 51:
-			case 52:
-			case 53:
-			case 54:
-			case 55:
-				factordetemp = tableCorrectionFactors[aisolation][6];
-				break;
+		// Caso 6
+		if (temperature >= 46 && temperature <= 50)
+			factordetemp = tableCorrectionFactors[aisolation][5];
 
-			// caso 8
-			case 56:
-			case 57:
-			case 58:
-			case 59:
-			case 60:
-				factordetemp = tableCorrectionFactors[aisolation][7];
-				break;
+		// Caso 7
+		if (temperature >= 51 && temperature <= 55)
+			factordetemp = tableCorrectionFactors[aisolation][6];
 
-			// caso 9
-			case 61:
-			case 62:
-			case 63:
-			case 64:
-			case 65:
-			case 66:
-			case 67:
-			case 68:
-			case 69:
-			case 70:
-				factordetemp = tableCorrectionFactors[aisolation][8];
-				break;
+		// Caso 8
+		if (temperature >= 56 && temperature <= 60)
+			factordetemp = tableCorrectionFactors[aisolation][7];
 
-			// caso 10
-			case 71:
-			case 72:
-			case 73:
-			case 74:
-			case 75:
-			case 76:
-			case 77:
-			case 78:
-			case 79:
-			case 80:
-				factordetemp = tableCorrectionFactors[aisolation][9];
-				break;
+		// Caso 9
+		if (temperature >= 61 && temperature <= 70)
+			factordetemp = tableCorrectionFactors[aisolation][8];
 
-			default:
-				return res.status(401).json({
-					message:
-						'Error, la temperatura debe estar entre 21 y 80 grados.',
-				});
-		}
+		// Caso 10
+		if (temperature >= 71 && temperature <= 80)
+			factordetemp = tableCorrectionFactors[aisolation][9];
 
 		// G94 = fases * CondPFases
 		const G94 = loadPhases * perPhase;
@@ -204,73 +133,23 @@ export default class CircuitController {
 
 		// Calculando F96
 		let F96;
-		switch (I94) {
-			// caso 1
-			case 1:
-				F96 = 1;
-				break;
 
-			// caso 2
-			case 4:
-			case 5:
-			case 6:
-				F96 = 0.8;
-				break;
-
-			// caso 3
-			case 7:
-			case 8:
-			case 9:
-				F96 = 0.7;
-				break;
-
-			// caso 4
-			case 10:
-			case 11:
-			case 12:
-			case 13:
-			case 14:
-			case 15:
-			case 16:
-			case 17:
-			case 18:
-			case 19:
-			case 20:
-				F96 = 0.5;
-				break;
-
-			// caso 5
-			case 21:
-			case 22:
-			case 23:
-			case 24:
-			case 25:
-			case 26:
-			case 27:
-			case 28:
-			case 29:
-			case 30:
-				F96 = 0.45;
-				break;
-
-			// caso 6
-			case 31:
-			case 32:
-			case 33:
-			case 34:
-			case 35:
-			case 36:
-			case 37:
-			case 38:
-			case 39:
-			case 40:
-				F96 = 0.4;
-				break;
-
-			// caso 7
-			default:
-				F96 = 0.35;
-				break;
+		if (I94 == 1) F96 = 1;
+		else {
+			if (I94 <= 6) F96 = 0.8;
+			else {
+				if (I94 <= 9) F96 = 0.7;
+				else {
+					if (I94 <= 20) F96 = 0.5;
+					else {
+						if (I94 <= 30) F96 = 0.45;
+						else {
+							if (I94 <= 40) F96 = 0.4;
+							else F96 = 0.35;
+						}
+					}
+				}
+			}
 		}
 
 		// Asignando el valor de D98
@@ -304,7 +183,6 @@ export default class CircuitController {
 			});
 			res.json(report);
 		} catch (error) {
-			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, este reporte no esta registrado.',
 			});
@@ -340,9 +218,8 @@ export default class CircuitController {
 			// Si no hay errores, guardo el registro
 			await getRepository(Report).save(report);
 		} catch (error) {
-			// En caso contrario, emito un error
 			return res.status(401).json({
-				message: 'Error, algo salio mal.',
+				message: 'Error, no se pudo guardar el registro del reporte.',
 			});
 		}
 		res.status(201).json({
@@ -364,7 +241,6 @@ export default class CircuitController {
 			report.protection_device = input.protection_device;
 			report.voltaje_drop = input.voltaje_drop;
 		} catch (error) {
-			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, el reporte no existe.',
 			});

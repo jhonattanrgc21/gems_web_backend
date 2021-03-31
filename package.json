@@ -1,10 +1,10 @@
 {
   "name": "gems_backend",
-  "version": "2.4.1",
+  "version": "2.7.1",
   "description": "Back-End de la plataforma del Grupo Empresarial Metain SAS",
   "main": "index.js",
   "scripts": {
-    "start:dev": "set NODE_PLAY=true && nodemon",
+    "start:dev": "nodemon",
     "build": "rimraf ./dist && tsc",
     "start": "npm run build && node dist/index.js",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",

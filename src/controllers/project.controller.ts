@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
-
-import Project from '../database/entities/project.entity';
-import User from '../database/entities/user.entity';
+import Project from '../database/entities/projects.entity';
+import User from '../database/entities/users.entity';
 
 // ======================================
 //			Project Controller
@@ -13,17 +12,15 @@ export default class ProjectController {
 		let { id } = res.locals.jwtPayload;
 
 		const user = await getRepository(User).findOne(id);
+
 		// Verifico si existen proyectos
 		projects = await getRepository(Project).find({
 			where: { user },
 			relations: ['boards'],
 		});
 
-		if (projects.length) {
-			// Si existen proyectos, devuelvo sus datos
-			res.json(projects);
-		}
-		// En caso contrario, envio un error.
+		// Si existen proyectos, devuelvo sus datos
+		if (projects.length) res.json(projects);
 		else
 			return res.status(404).json({
 				message: 'Error, no existen proyectos registrados.',
@@ -40,13 +37,11 @@ export default class ProjectController {
 			relations: ['boards'],
 		});
 
-		if (project) {
-			// Si existe el proyecto, devuelvo sus datos.
-			res.json(project);
-		} else {
-			// En caso contrario, envio un error.
+		// Si existe el proyecto, devuelvo sus datos.
+		if (project) res.json(project);
+		else {
 			return res.status(404).json({
-				message: 'Error, este proyecto no existe.',
+				message: 'Error, este proyecto no esta registrado.',
 			});
 		}
 	};
@@ -55,14 +50,13 @@ export default class ProjectController {
 		const { name } = req.body;
 		const { id } = res.locals.jwtPayload;
 
-		// Validando que vienen datos del Front-End
+		// Validando los datos que vienen del front
 		if (!name)
 			return res
 				.status(400)
 				.json({ message: 'Este campo es requerido.' });
 
 		let project = new Project();
-
 		project.name = name;
 
 		// Asocio al usuario correspondiente
@@ -72,7 +66,6 @@ export default class ProjectController {
 			// Si no hay errores, guardo el registro de proyectos
 			await getRepository(Project).save(project);
 		} catch (error) {
-			// En caso contrario, envio un error.
 			return res.status(409).json({
 				message: 'Error, ya existe un proyecto con este nombre.',
 			});
@@ -91,16 +84,14 @@ export default class ProjectController {
 		const user = await getRepository(User).findOne(id_user);
 
 		let project: Project;
-		project = await getRepository(Project).findOne(id, {
-			where: { user },
-			relations: ['boards'],
-		});
-
-		if (project) {
+		try {
 			// Si existe el proyecto, actualizo su nombre.
+			project = await getRepository(Project).findOneOrFail(id, {
+				where: { user },
+				relations: ['boards'],
+			});
 			project.name = name;
-		} else {
-			// En caso contrario, envio un error.
+		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, este proyecto no existe.',
 			});
@@ -116,7 +107,7 @@ export default class ProjectController {
 			});
 		}
 
-		return res.status(201).json({
+		res.status(201).json({
 			message: 'Proyecto actualizado con exito.',
 		});
 	};
@@ -129,10 +120,9 @@ export default class ProjectController {
 		try {
 			// Verifico si el proyecto existe.
 			await getRepository(Project).findOneOrFail(id, {
-				where: { user }
+				where: { user },
 			});
 		} catch (error) {
-			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, el proyecto no existe.',
 			});

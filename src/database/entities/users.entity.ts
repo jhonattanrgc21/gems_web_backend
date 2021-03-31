@@ -2,26 +2,21 @@ import {
 	Index,
 	Entity,
 	Column,
-	UpdateDateColumn,
-	CreateDateColumn,
 	PrimaryGeneratedColumn,
 	OneToMany,
 	ManyToOne,
-	JoinColumn,
-	BaseEntity,
+	JoinColumn
 } from 'typeorm';
 import bcrypt from 'bcryptjs';
-import Project from './project.entity';
-import Country from './country.entity';
+import Project from './projects.entity';
+import Country from './countries.entity';
+import UuidEntity from './uuid.entity';
 
 // ======================================
 //		User Entity - SQL
 // ======================================
 @Entity('users')
-export default class User extends BaseEntity {
-	@PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
-	public id!: string;
-
+export default class User extends UuidEntity {
 	@Index('user_username_unique', { unique: true })
 	@Column({
 		type: 'varchar',
@@ -113,20 +108,6 @@ export default class User extends BaseEntity {
 	@ManyToOne(() => Country, (country: Country) => country.users)
 	@JoinColumn({ name: 'country_id' })
 	public country?: Country;
-
-	@CreateDateColumn({
-		type: 'timestamp',
-		nullable: true,
-		select: false,
-	})
-	public created_at?: string;
-
-	@UpdateDateColumn({
-		type: 'timestamp',
-		nullable: true,
-		select: false,
-	})
-	public updated_at?: string;
 
 	// ======================================
 	//			Encrypt Password

@@ -4,27 +4,21 @@ import {
 	Column,
 	ManyToOne,
 	JoinColumn,
-	UpdateDateColumn,
-	CreateDateColumn,
 	PrimaryGeneratedColumn,
-	BaseEntity,
-	OneToMany,
+	OneToMany
 } from 'typeorm';
-import User from './user.entity';
-import Board from './board.entity';
+import User from './users.entity';
+import Board from './boards.entity';
+import UuidEntity from './uuid.entity';
 
 // ======================================
 //		Project Entity - SQL
 // ======================================
 @Entity('projects')
-export default class Project extends BaseEntity {
-	@PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
-	public id!: string;
-
+export default class Project extends UuidEntity {
 	@Index('project_name_unique', { unique: true })
 	@Column({ type: 'varchar', length: 191, comment: 'Nombre del Proyecto' })
 	public name!: string;
-
 
 	// ======================================
 	//			RelationShips
@@ -37,18 +31,4 @@ export default class Project extends BaseEntity {
 	// Un proyecto tiene muchos tableros
 	@OneToMany(() => Board, (boards: Board) => boards.project)
 	public boards?: Board[];
-
-	@CreateDateColumn({
-		type: 'timestamp',
-		nullable: true,
-		select: false,
-	})
-	public created_at?: string;
-
-	@UpdateDateColumn({
-		type: 'timestamp',
-		nullable: true,
-		select: false,
-	})
-	public updated_at?: string;
 }
