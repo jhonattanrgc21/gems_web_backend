@@ -319,7 +319,7 @@ export default class AuthController {
 		const token = jwt.sign(
 			{ id: user.id, email: user.email },
 			process.env.SECRET_KEY || 'JG-DEV',
-			{ expiresIn: '1h' },
+			{ expiresIn: '6d' },
 		);
 
 		/* Si el usuario esta registrado le envio
