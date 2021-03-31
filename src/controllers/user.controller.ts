@@ -60,7 +60,8 @@ export default class UserController {
 				input.email &&
 				input.password &&
 				input.first_name &&
-				input.last_name
+				input.last_name &&
+				input.phone
 			)
 		)
 			return res
@@ -91,6 +92,16 @@ export default class UserController {
 				});
 		}
 
+		if (input.phone) {
+			// Validando por numero de telefono
+			user = await getRepository(User).findOne(input.phone);
+			if (user)
+				return res.status(409).json({
+					message:
+						'Error, ya existe un usuario con este numero de telefono.',
+				});
+		}
+
 		let entity = new User();
 		entity.username = input.username;
 		entity.email = input.email;
@@ -98,6 +109,7 @@ export default class UserController {
 		entity.first_name = input.first_name;
 		entity.last_name = input.last_name;
 		entity.profesionalID = input.profesionalID ? input.profesionalID : null;
+		entity.phone = input.phone ? input.phone : null;
 		entity.status = true;
 
 		try {
@@ -162,7 +174,7 @@ export default class UserController {
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(409).json({
-				message: 'Error, ya existe un usuario con este profesionalID.',
+				message: 'Error, ya existe un usuario con este profesionalID o numero de telefono.',
 			});
 		}
 

@@ -24,7 +24,7 @@ export default class Project extends UuidEntity {
 	//			RelationShips
 	// ======================================
 	// Muchos proyectos son realizados por un usuario
-	@ManyToOne(() => User, (user: User) => user.projects)
+	@ManyToOne(() => User, (user: User) => user.projects, { onUpdate: 'CASCADE', onDelete: 'CASCADE'})
 	@JoinColumn({ name: 'user_id' })
 	public user!: User;
 

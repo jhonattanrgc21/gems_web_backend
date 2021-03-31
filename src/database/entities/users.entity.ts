@@ -51,6 +51,7 @@ export default class User extends UuidEntity {
 	})
 	public last_name!: string;
 
+	@Index('user_phone_unique', { unique: true })
 	@Column({
 		type: 'varchar',
 		length: 20,

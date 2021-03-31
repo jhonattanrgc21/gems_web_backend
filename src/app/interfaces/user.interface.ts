@@ -10,6 +10,7 @@ export interface CreateUserInterface {
 	first_name: string;
 	last_name: string;
 	profesionalID?: number;
+	phone?: string;
 	status?: boolean;
 }
 

@@ -57,7 +57,10 @@ export default class Report extends UuidEntity {
 	// ======================================
 
 	// Muchos reportes son generados por un circuito
-	@ManyToOne(() => Circuit, (circuit: Circuit) => circuit.reports)
+	@ManyToOne(() => Circuit, (circuit: Circuit) => circuit.reports, {
+		onUpdate: 'CASCADE',
+		onDelete: 'CASCADE',
+	})
 	@JoinColumn({ name: 'circuit_id' })
 	public circuit!: Circuit;
 }

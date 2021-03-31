@@ -23,7 +23,10 @@ export default class Board extends UuidEntity {
 	//			RelationShips
 	// ======================================
 	// Muchos tableros son de un proyecto
-	@ManyToOne(() => Project, (project: Project) => project.boards)
+	@ManyToOne(() => Project, (project: Project) => project.boards, {
+		onUpdate: 'CASCADE',
+		onDelete: 'CASCADE',
+	})
 	@JoinColumn({ name: 'project_id' })
 	public project!: Project;
 
@@ -36,8 +39,10 @@ export default class Board extends UuidEntity {
 	public board_hijos?: Board[];
 
 	// Muchos Subtableros pertenecen a un tablero
-	@ManyToOne(() => Board, (board_padre: Board) => board_padre.board_hijos)
-	@JoinColumn({ name: 'board_padre_id'})
+	@ManyToOne(() => Board, (board_padre: Board) => board_padre.board_hijos, {
+		onUpdate: 'CASCADE',
+		onDelete: 'CASCADE',
+	})
+	@JoinColumn({ name: 'board_padre_id' })
 	public board_padre?: Board;
-
 }

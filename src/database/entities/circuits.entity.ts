@@ -23,7 +23,10 @@ export default class Circuit extends UuidEntity {
 	//			RelationShips
 	// ======================================
 	// Muchos circuitos son contenidos por un tablero
-	@ManyToOne(() => Board, (board_padre: Board) => board_padre.circuits)
+	@ManyToOne(() => Board, (board_padre: Board) => board_padre.circuits, {
+		onUpdate: 'CASCADE',
+		onDelete: 'CASCADE',
+	})
 	@JoinColumn({ name: 'board_padre_id' })
 	public board_padre!: Board;
 

@@ -16,6 +16,7 @@ export default class AuthController {
 			first_name,
 			last_name,
 			profesionalID,
+			phone,
 			idioma,
 		} = req.body;
 
@@ -32,6 +33,7 @@ export default class AuthController {
 				password &&
 				first_name &&
 				last_name &&
+				phone &&
 				idioma
 			)
 		)
@@ -68,6 +70,17 @@ export default class AuthController {
 				});
 		}
 
+
+		if (phone) {
+			// Validando por numero de telefono
+			user = await getRepository(User).findOne({ phone });
+			if (user)
+				return res.status(409).json({
+					message:
+						'Error, ya existe un usuario con este numero de telefono.',
+				});
+		}
+
 		// Genero un nuevo token que expira en 10 minutos para cambiar la contraseña
 		const token = jwt.sign(
 			{ id: user.id, email: user.email },
@@ -84,6 +97,7 @@ export default class AuthController {
 		entity.first_name = first_name;
 		entity.last_name = last_name;
 		entity.profesionalID = profesionalID ? profesionalID : null;
+		entity.phone = phone;
 		entity.confirmToken = token;
 
 		try {
