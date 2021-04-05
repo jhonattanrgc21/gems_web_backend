@@ -85,6 +85,13 @@ export default class User extends UuidEntity {
 
 	@Column({
 		type: 'text',
+		comment: 'Código.',
+		nullable: true,
+	})
+	public code?: string;
+
+	@Column({
+		type: 'text',
 		comment: 'Confirmacion de token.',
 		nullable: true,
 	})

@@ -70,7 +70,6 @@ export default class AuthController {
 				});
 		}
 
-
 		if (phone) {
 			// Validando por numero de telefono
 			user = await getRepository(User).findOne({ phone });
@@ -81,14 +80,6 @@ export default class AuthController {
 				});
 		}
 
-		// Genero un nuevo token que expira en 10 minutos para cambiar la contraseña
-		const token = jwt.sign(
-			{ id: user.id, email: user.email },
-			process.env.SECRET_KEY_RESET || 'JG-DEV123',
-			{ expiresIn: '30d' },
-		);
-
-		let verificacionLink = `http://localhost:3004/message/${token}`;
 
 		let entity = new User();
 		entity.username = username;
@@ -98,6 +89,15 @@ export default class AuthController {
 		entity.last_name = last_name;
 		entity.profesionalID = profesionalID ? profesionalID : null;
 		entity.phone = phone;
+
+		// Genero un nuevo token que expira en 10 minutos para cambiar la contraseña
+		const token = jwt.sign(
+			{ id: entity.id, email: entity.email },
+			process.env.SECRET_KEY_RESET || 'JG-DEV123',
+			{ expiresIn: '6d' },
+		);
+
+		let verificacionLink = `http://localhost:3004/message/${token}`;
 		entity.confirmToken = token;
 
 		try {
@@ -129,7 +129,7 @@ export default class AuthController {
 		try {
 			await transporter.sendMail({
 				from: '"Emprendimiento T-Board" <jhonattanrgc21@gmail.com>', // sender address
-				to: user.email, // list of receivers
+				to: entity.email, // list of receivers
 				subject: `${asunto} ✔`, // Subject line
 				html: `
 				<b>${texto} </b>
@@ -437,6 +437,54 @@ export default class AuthController {
 
 		res.status(201).json({ message, info: emailStatus });
 	};
+
+	static forgotPasswordSms = async (req: Request, res: Response) => {
+		const { phone, idioma } = req.body;
+
+		// Validando mlos datos que vienen del Front-End
+		if (!(phone && idioma))
+			return res.status(400).json({
+				message: 'Todos los campos son requeridos.',
+			});
+
+		if (idioma != 'es' && idioma != 'en')
+			res.status(400).json({
+				message: 'Error, el idioma no es valido.',
+			});
+
+		let user: User;
+
+		try {
+			// Validando por phone
+			user = await getRepository(User).findOneOrFail({ phone });
+		} catch (error) {
+			return res.status(400).json({
+				message: 'Error, este usuario no esta registrado..',
+			});
+		}
+
+		// Genero un nuevo token que expira en 5 minutos para cambiar la contraseña
+		const token = jwt.sign(
+			{ id: user.id, email: user.email },
+			process.env.SECRET_KEY_RESET || 'JG-DEV123',
+			{ expiresIn: '5m' },
+		);
+
+		const code = (Math.floor(Math.random() * 2000) + 1).toString();
+		user.code = code;
+		user.resetToken = token;
+
+		// Guardo el nuevo token del usuario
+		try {
+			user = await getRepository(User).save(user);
+		} catch (error) {
+			return res.status(400).json({ message: 'Algo salio mal.' });
+		}
+
+		res.json({ message: 'OK', token });
+	};
+
+	static verifyCode = async (req: Request, res: Response) => {};
 
 	static createNewPassword = async (req: Request, res: Response) => {
 		const { password, confirmPassword, idioma } = req.body;
