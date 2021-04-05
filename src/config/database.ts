@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { createConnection, useContainer } from 'typeorm';
+import { createConnection } from 'typeorm';
 
 // ======================================
 //				Database

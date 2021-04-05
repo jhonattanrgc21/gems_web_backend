@@ -20,6 +20,7 @@ export default class UserController {
 				'first_name',
 				'last_name',
 				'profesionalID',
+				'phone',
 				'status',
 			],
 			relations: ['country', 'projects'],

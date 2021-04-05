@@ -33,6 +33,12 @@ routes.post('/change-password', [checkJwt], AuthController.changePassword);
 // Olvide mi contraseña
 routes.put('/forgot-password', AuthController.forgotPassword);
 
+// Reestablecer contraseña por SMS
+routes.put('/forgot-password-sms', AuthController.forgotPasswordSms);
+
+// Verificar codigo del sms
+routes.put('/verifyCode', AuthController.verifyCode);
+
 // Crear nueva contraseña en caso de que se olvidara la anterior
 routes.put('/new-password', AuthController.createNewPassword);
 
