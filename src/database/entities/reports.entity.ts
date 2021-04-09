@@ -14,14 +14,14 @@ import UuidEntity from './uuid.entity';
 @Entity('reports')
 export default class Report extends UuidEntity {
 	@Column({
-		type: 'bigint',
+		type: 'double',
 		unsigned: true,
 		default: 0,
 	})
 	public current?: number;
 
 	@Column({
-		type: 'bigint',
+		type: 'double',
 		unsigned: true,
 		comment: 'Anchura del cable.',
 		default: 0,
@@ -29,7 +29,7 @@ export default class Report extends UuidEntity {
 	public cable_width?: number;
 
 	@Column({
-		type: 'bigint',
+		type: 'double',
 		unsigned: true,
 		comment: 'Diametro de la tuberia.',
 		default: 0,
@@ -37,7 +37,7 @@ export default class Report extends UuidEntity {
 	public pipe_diameter?: number;
 
 	@Column({
-		type: 'bigint',
+		type: 'double',
 		unsigned: true,
 		comment: 'Dispositivo de proteccion.',
 		default: 0,
@@ -45,7 +45,7 @@ export default class Report extends UuidEntity {
 	public protection_device?: number;
 
 	@Column({
-		type: 'bigint',
+		type: 'double',
 		unsigned: true,
 		comment: 'Caida de voltaje.',
 		default: 0,

@@ -11,7 +11,6 @@ export interface CreateUserInterface {
 	last_name: string;
 	profesionalID?: number;
 	phone?: string;
-	status?: boolean;
 }
 
 export interface UpdateUserInterface {

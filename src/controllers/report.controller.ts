@@ -2,7 +2,19 @@ import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import Report from '../database/entities/reports.entity';
 import { ReportInterface } from '../app/interfaces/report.interface';
-import { tableCorrectionFactors } from '../config/tableCalculate';
+import {
+	tableCorrectionFactors,
+	tableTemperature,
+	calibresTemperatura,
+	calibres9,
+	table9,
+	buscarIndexCalibre,
+	buscarTabla9,
+	s21,
+	buscarElemMmayor,
+	b161Y,
+	b161X,
+} from '../config/tableCalculate';
 
 // ======================================
 //			Report Controller
@@ -27,36 +39,65 @@ export default class CircuitController {
 
 	static listForm = (req: Request, res: Response) => {
 		let {
-			loadType,
-			power,
-			distance,
-			powerFactor,
-			voltajeDrop,
-			aisolation,
-			temperature,
-			loadPhases,
-			perPhase,
+			loadType, // Tipo de carga. Sus valores deben en el back estar entre 0 y 2 y en el front los que ya aparecen en el menu desplegable
+			power, // Potencia del circuito
+			distance, // Distancia del circuito
+			powerFactor, // Factor de potencia
+			voltageDrop, // Caida de voltaeje
+			aisolation, // Aislamiento. Debe estar entre 0 y 2 en el back y en el front los que ya aparecen en el menu desplegable
+			temperature, // Debe estar entre 21 y 80
+			loadPhases, //  Fases. Debe estar entre 1 y 3
+			perPhase, // condPFases. Debe ser mayor a 0
+			feeder_include_neutral_wire, // Sistema alimentado con neutro. Debe ser true o false
+			pipe_material, // Material por tuberia. Sus valoresen el front  som: [pvc | al | acero] y en el back debe estar entre 0 y 2
+			system_voltage, // Tension del sistema. Sus valores son 120, 208, 220
 		} = req.body;
 
-		/*
-			la temperatura debe estar entre 21 y 80
-			El aislamiento debe estar ebtre 1 y 3
-			Las fases deben estar entre 1 y 3
-		*/
-
+		// Validando los datos de entrada
 		if (
-			aisolation < 1 ||
-			aisolation > 3 ||
+			aisolation < 0 ||
+			aisolation > 2 ||
 			loadPhases < 1 ||
 			loadPhases > 3 ||
 			perPhase <= 0 ||
+			power <= 0 ||
+			distance <= 0 ||
+			powerFactor <= 0 ||
+			voltageDrop <= 0 ||
 			temperature < 21 ||
 			temperature > 80
 		)
 			return res.status(401).json({
 				message:
-					'Error, el valor del aislamiento y las fases deben estar entre 1 y 3, perPhase debe ser mayor a 0 y la temperatura debe estar entre 21 y 80.',
+					'Error, el valor de aisolation debe estar entre 0 y 2, las loadPhases debe estar entre 1 y 3, perPhase, power, powerFator, distance, voltageDro debe ser mayor a 0 y la temperatura debe estar entre 21 y 80.',
 			});
+
+		let col_ral, col_xal;
+
+		switch (pipe_material) {
+			case 0:
+				col_ral = 2; // 4
+				col_xal = 0; // 2
+				break;
+
+			case 1:
+				col_ral = 3; // 5
+				col_xal = 0; // 2
+				break;
+
+			case 2:
+				col_ral = 4; // 6
+				col_xal = 1; // 3
+				break;
+
+			default:
+				return res.status(401).json({
+					message:
+						'Error, el valor de pipe_material debe estar entre 0 y 2.',
+				});
+		}
+
+		// Calculos del diagrama de flujo
 
 		let O95;
 		switch (loadPhases) {
@@ -67,7 +108,7 @@ export default class CircuitController {
 
 			case 2:
 				// O95 = F7 / (220 * fp)
-				O95 = power / (220 * powerFactor);
+				O95 = power / (system_voltage * powerFactor);
 				break;
 
 			case 3:
@@ -82,7 +123,6 @@ export default class CircuitController {
 		}
 
 		//Calculando el factor de temperatura
-		aisolation--;
 		let factordetemp;
 
 		// Caso 1
@@ -132,9 +172,9 @@ export default class CircuitController {
 		const I94 = Math.round(G94);
 
 		// Calculando F96
-		let F96;
+		let F96: number;
 
-		if (I94 == 1) F96 = 1;
+		if (I94 < 4) F96 = 1;
 		else {
 			if (I94 <= 6) F96 = 0.8;
 			else {
@@ -152,7 +192,7 @@ export default class CircuitController {
 			}
 		}
 
-		// Asignando el valor de D98
+		// Asignando el valor de D98. Este es el valor de la fholgura
 		const D98 = 1.25;
 
 		// Calculando E102 = (D98 * D89) / (I96 * F96 * factordetemp)
@@ -161,14 +201,123 @@ export default class CircuitController {
 		// Calculando I_conFact = E102 / CondPFase
 		const I_conFact = E102 / perPhase;
 
+		// Calculando condporcapacidad = calibre y F107 = grado ubicado por el aislamiento
+		let condporcapacidad: string, F107: number, index: number;
+	
+		index = buscarIndexCalibre(calibresTemperatura, I_conFact);
+		if (index != -1 && index + 1 <= calibresTemperatura.length) {
+			condporcapacidad = calibresTemperatura[index + 1];
+			F107 = tableTemperature[aisolation][index + 1];
+		} else
+			return res.status(401).json({
+				message:
+					'Error, no se pudo calcular el condporcapacidad y el F107.',
+			});
+
+		let n = -1,
+			DV: number,
+			Ral: number,
+			Xal: number,
+			CalibreSelecc: string;
+
+		index = buscarIndexCalibre(calibres9, condporcapacidad);
+
+		if (index == -1)
+			return res.status(401).json({
+				message: 'Error, condporcapacidad no existe en la tabla 9.',
+			});
+
+		do {
+			n++;
+			if (n == 0) {
+				CalibreSelecc = condporcapacidad;
+				Ral = table9[col_ral][index];
+				Xal = table9[col_xal][index];
+				//Ral = buscarTabla9(CalibreSelecc, col_ral, 0);
+				//Xal = buscarTabla9(CalibreSelecc, col_xal, 0);
+			} else {
+				if (index + n <= calibres9.length)
+					CalibreSelecc = calibres9[index + n];
+				else
+					return res.status(401).json({
+						message:
+							'Error, CalibreSelecc no existe en la tabla 9.',
+					});
+
+				Ral = table9[col_ral][index + n];
+				Xal = table9[col_xal][index + n];
+				//Ral = buscarTabla9(CalibreSelecc, col_ral, n);
+				//Xal = buscarTabla9(CalibreSelecc, col_xal, n);
+			}
+
+			// Calculando el Zeficaz = Ral * fp + Xal * sin(acos(fp))
+			const Zeficaz =
+				Ral * powerFactor + Xal * Math.sin(Math.acos(powerFactor));
+
+			// Calculando el Zef = ((((2 * Zeficaz * DistanciaDelCircuito) / 1000) * I_conFact * factordetemp) / D98) / (tension * 100);
+			const Zef =
+				(((2 * Zeficaz * distance) / 1000) * I_conFact * factordetemp) /
+				D98 /
+				(system_voltage * 100);
+
+			// Calculando el DV
+			DV =
+				(((2 * Zeficaz * distance) / 1000) * I_conFact * factordetemp) /
+				D98;
+			switch (loadPhases) {
+				case 1:
+					DV = DV / (120 * 100);
+					break;
+
+				case 2:
+					DV = DV / (220 * 100);
+					break;
+
+				case 3:
+					DV = DV / (208 * 100);
+					break;
+
+				default:
+					return res.status(401).json({
+						message: 'Error de tension.',
+					});
+			}
+		} while (DV < voltageDrop);
+
+		// Calculando CorrienteDeProtecc = O95 * 1.25
+		const CorrienteDeProtecc = O95 * D98;
+
+		// Calculando Protecc
+		const Protecc = buscarElemMmayor(s21, CorrienteDeProtecc);
+
+		if (Protecc == -1)
+			return res.status(401).json({
+				message: 'Error, no se encontro el valor para Protecc en el vector s21.',
+			});
+
+		// Condicional del Neutro
+		let D184: number;
+		if (feeder_include_neutral_wire) D184 = I94 + 1;
+		else D184 = I94;
+
+		D184++;
+
+		const PosicionY: number = buscarIndexCalibre(b161Y, CalibreSelecc);
+		let PosicionX: number;
+		if (PosicionY != -1) {
+			PosicionX = buscarElemMmayor(b161X[PosicionY].reverse(), D184);
+		} else
+			return res.status(401).json({
+				message:
+					'Error, no se encontro el calibre en la PosicionY del vector B161.',
+			});
+
 		const calculos = {
 			current: E102,
-			cable_width: (Math.floor(Math.random() * 2000) + 1).toString(),
-			pipe_diameter: (Math.floor(Math.random() * 2000) + 1).toString(),
-			protection_device: (
-				Math.floor(Math.random() * 2000) + 1
-			).toString(),
-			voltaje_drop: (Math.floor(Math.random() * 2000) + 1).toString(),
+			cable_width: CalibreSelecc,
+			pipe_diameter: PosicionX,
+			protection_device: Protecc,
+			voltage_drop: DV,
 		};
 
 		return res.json(calculos);

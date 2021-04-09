@@ -175,7 +175,8 @@ export default class UserController {
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(409).json({
-				message: 'Error, ya existe un usuario con este profesionalID o numero de telefono.',
+				message:
+					'Error, ya existe un usuario con este profesionalID o numero de telefono.',
 			});
 		}
 
