@@ -8,10 +8,7 @@ import {
 	calibresTemperatura,
 	calibres9,
 	table9,
-	buscarIndexCalibre,
-	buscarTabla9,
 	s21,
-	buscarElemMmayor,
 	b161Y,
 	b161X,
 } from '../config/tableCalculate';
@@ -42,7 +39,7 @@ export default class CircuitController {
 			loadType, // Tipo de carga. Sus valores deben en el back estar entre 0 y 2 y en el front los que ya aparecen en el menu desplegable
 			power, // Potencia del circuito
 			distance, // Distancia del circuito
-			powerFactor, // Factor de potencia
+			powerFactor, // Factor de potencia. Es un valor decimal entre 0 y 1
 			voltageDrop, // Caida de voltaeje
 			aisolation, // Aislamiento. Debe estar entre 0 y 2 en el back y en el front los que ya aparecen en el menu desplegable
 			temperature, // Debe estar entre 21 y 80
@@ -107,7 +104,7 @@ export default class CircuitController {
 				break;
 
 			case 2:
-				// O95 = F7 / (220 * fp)
+				// O95 = F7 / (tension * fp)
 				O95 = power / (system_voltage * powerFactor);
 				break;
 
@@ -202,25 +199,28 @@ export default class CircuitController {
 		const I_conFact = E102 / perPhase;
 
 		// Calculando condporcapacidad = calibre y F107 = grado ubicado por el aislamiento
-		let condporcapacidad: string, F107: number, index: number;
-	
-		index = buscarIndexCalibre(calibresTemperatura, I_conFact);
-		if (index != -1 && index + 1 <= calibresTemperatura.length) {
-			condporcapacidad = calibresTemperatura[index + 1];
-			F107 = tableTemperature[aisolation][index + 1];
-		} else
+		let condporcapacidad: string, F107: number, indexTemperature: number;
+
+		indexTemperature = tableTemperature[aisolation].findIndex(
+			(elem) => elem > I_conFact,
+		);
+		if (indexTemperature == -1)
 			return res.status(401).json({
 				message:
 					'Error, no se pudo calcular el condporcapacidad y el F107.',
 			});
 
+		condporcapacidad = calibresTemperatura[indexTemperature];
+		F107 = tableTemperature[aisolation][indexTemperature];
+
 		let n = -1,
 			DV: number,
 			Ral: number,
 			Xal: number,
+			index: number,
 			CalibreSelecc: string;
 
-		index = buscarIndexCalibre(calibres9, condporcapacidad);
+		index = calibres9.indexOf(condporcapacidad);
 
 		if (index == -1)
 			return res.status(401).json({
@@ -233,48 +233,63 @@ export default class CircuitController {
 				CalibreSelecc = condporcapacidad;
 				Ral = table9[col_ral][index];
 				Xal = table9[col_xal][index];
-				//Ral = buscarTabla9(CalibreSelecc, col_ral, 0);
-				//Xal = buscarTabla9(CalibreSelecc, col_xal, 0);
 			} else {
-				if (index + n <= calibres9.length)
-					CalibreSelecc = calibres9[index + n];
+				if (index + n <= calibres9.length) {
+					Ral = table9[col_ral][index + n];
+					Xal = table9[col_xal][index + n];
+				} else
+					return res.status(401).json({
+						message:
+							'Error, el Ral y el Xal no exiten en la tabla9.',
+					});
+
+				if (indexTemperature + n <= calibresTemperatura.length)
+					CalibreSelecc = CalibreSelecc =
+						calibresTemperatura[indexTemperature + n];
 				else
 					return res.status(401).json({
 						message:
-							'Error, CalibreSelecc no existe en la tabla 9.',
+							'Error, CalibreSelecc no existe en la tabla  de temperatura.',
 					});
-
-				Ral = table9[col_ral][index + n];
-				Xal = table9[col_xal][index + n];
-				//Ral = buscarTabla9(CalibreSelecc, col_ral, n);
-				//Xal = buscarTabla9(CalibreSelecc, col_xal, n);
 			}
 
 			// Calculando el Zeficaz = Ral * fp + Xal * sin(acos(fp))
 			const Zeficaz =
 				Ral * powerFactor + Xal * Math.sin(Math.acos(powerFactor));
 
-			// Calculando el Zef = ((((2 * Zeficaz * DistanciaDelCircuito) / 1000) * I_conFact * factordetemp) / D98) / (tension * 100);
+			// Calculando el Zef = ((((2 * Zeficaz * DistanciaDelCircuito) / 1000) * I_conFact * factordetemp) / Fholgura) / (tension * 100);
 			const Zef =
 				(((2 * Zeficaz * distance) / 1000) * I_conFact * factordetemp) /
 				D98 /
 				(system_voltage * 100);
 
 			// Calculando el DV
-			DV =
-				(((2 * Zeficaz * distance) / 1000) * I_conFact * factordetemp) /
-				D98;
 			switch (loadPhases) {
 				case 1:
-					DV = DV / (120 * 100);
+					DV =
+						(((2 * Zeficaz * distance) / 1000) *
+							I_conFact *
+							factordetemp) /
+						D98 /
+						(120 * 100);
 					break;
 
 				case 2:
-					DV = DV / (220 * 100);
+					DV =
+						(((2 * Zeficaz * distance) / 1000) *
+							I_conFact *
+							factordetemp) /
+						D98 /
+						(220 * 100);
 					break;
 
 				case 3:
-					DV = DV / (208 * 100);
+					DV =
+						(((Zeficaz * distance) / 1000) *
+							I_conFact *
+							factordetemp) /
+						D98 /
+						(208 * 100);
 					break;
 
 				default:
@@ -288,11 +303,11 @@ export default class CircuitController {
 		const CorrienteDeProtecc = O95 * D98;
 
 		// Calculando Protecc
-		const Protecc = buscarElemMmayor(s21, CorrienteDeProtecc);
-
-		if (Protecc == -1)
+		const Protecc = s21.find((elem) => elem > CorrienteDeProtecc);
+		if (!Protecc)
 			return res.status(401).json({
-				message: 'Error, no se encontro el valor para Protecc en el vector s21.',
+				message:
+					'Error, no se encontro el valor para Protecc en el vector s21.',
 			});
 
 		// Condicional del Neutro
@@ -302,10 +317,11 @@ export default class CircuitController {
 
 		D184++;
 
-		const PosicionY: number = buscarIndexCalibre(b161Y, CalibreSelecc);
+		const PosicionY: number = b161Y.indexOf(CalibreSelecc);
 		let PosicionX: number;
 		if (PosicionY != -1) {
-			PosicionX = buscarElemMmayor(b161X[PosicionY].reverse(), D184);
+			const fila = b161X[PosicionY].reverse();
+			PosicionX = fila.find((elem) => elem > D184);
 		} else
 			return res.status(401).json({
 				message:
