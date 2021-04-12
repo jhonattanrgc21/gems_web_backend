@@ -102,6 +102,7 @@ export default class AuthController {
 
 		try {
 			// Si no hay errores, guardo el registro de Usuario
+			entity.encryptPassword();
 			await getRepository(User).save(entity);
 		} catch (error) {
 			// En caso contrario, envio un error.

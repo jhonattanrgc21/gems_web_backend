@@ -257,39 +257,33 @@ export default class CircuitController {
 			const Zeficaz =
 				Ral * powerFactor + Xal * Math.sin(Math.acos(powerFactor));
 
-			// Calculando el Zef = ((((2 * Zeficaz * DistanciaDelCircuito) / 1000) * I_conFact * factordetemp) / Fholgura) / (tension * 100);
-			const Zef =
-				(((2 * Zeficaz * distance) / 1000) * I_conFact * factordetemp) /
-				D98 /
-				(system_voltage * 100);
-
 			// Calculando el DV
 			switch (loadPhases) {
 				case 1:
 					DV =
-						(((2 * Zeficaz * distance) / 1000) *
+						((((2 * Zeficaz * distance) / 1000) *
 							I_conFact *
 							factordetemp) /
 						D98 /
-						(120 * 100);
+						120) * 100;
 					break;
 
 				case 2:
 					DV =
-						(((2 * Zeficaz * distance) / 1000) *
+						((((2 * Zeficaz * distance) / 1000) *
 							I_conFact *
 							factordetemp) /
 						D98 /
-						(220 * 100);
+						220) * 100;
 					break;
 
 				case 3:
 					DV =
-						(((Zeficaz * distance) / 1000) *
+						((((Zeficaz * distance) / 1000) *
 							I_conFact *
 							factordetemp) /
 						D98 /
-						(208 * 100);
+						208) * 100;
 					break;
 
 				default:
@@ -297,7 +291,8 @@ export default class CircuitController {
 						message: 'Error de tension.',
 					});
 			}
-		} while (DV < voltageDrop);
+
+		} while (DV >= voltageDrop);
 
 		// Calculando CorrienteDeProtecc = O95 * 1.25
 		const CorrienteDeProtecc = O95 * D98;
