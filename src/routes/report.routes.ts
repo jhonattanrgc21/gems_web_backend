@@ -19,7 +19,7 @@ const routes = Router();
 routes.get('/', [checkJwt], ReportController.getAll);
 
 // Obtener la lista de valores previos a la insercion del registro
-routes.post('/listForm', ReportController.listForm);
+routes.post('/listForm', [checkJwt], ReportController.listForm);
 
 // Obtener un solo reporte
 routes.get('/:id', [checkJwt], ReportController.getById);

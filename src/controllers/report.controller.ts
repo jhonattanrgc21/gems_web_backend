@@ -99,10 +99,6 @@ export default class CircuitController {
 		let O95;
 		switch (loadPhases) {
 			case 1:
-				// O95 = F7 / (120 * fp)
-				O95 = power / (120 * powerFactor);
-				break;
-
 			case 2:
 				// O95 = F7 / (tension * fp)
 				O95 = power / (system_voltage * powerFactor);
@@ -110,7 +106,7 @@ export default class CircuitController {
 
 			case 3:
 				// O95 = F7 / (1.73 * 208 * fp)
-				O95 = power / (1.73 * 208 * powerFactor);
+				O95 = power / (1.73 * system_voltage * powerFactor);
 				break;
 
 			default:
@@ -260,21 +256,13 @@ export default class CircuitController {
 			// Calculando el DV
 			switch (loadPhases) {
 				case 1:
-					DV =
-						((((2 * Zeficaz * distance) / 1000) *
-							I_conFact *
-							factordetemp) /
-						D98 /
-						120) * 100;
-					break;
-
 				case 2:
 					DV =
 						((((2 * Zeficaz * distance) / 1000) *
 							I_conFact *
 							factordetemp) /
 						D98 /
-						220) * 100;
+						system_voltage) * 100;
 					break;
 
 				case 3:
@@ -283,7 +271,7 @@ export default class CircuitController {
 							I_conFact *
 							factordetemp) /
 						D98 /
-						208) * 100;
+						system_voltage) * 100;
 					break;
 
 				default:
