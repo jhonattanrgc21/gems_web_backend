@@ -14,7 +14,7 @@ export default class BoardController {
 
 		// Verifico si existen tableros
 		boards = await getRepository(Board).find({
-			relations: ['project', 'circuits', 'board_hijos'],
+			relations: ['project', 'circuits', 'board_padre','board_hijos'],
 		});
 
 		if (boards.length)
@@ -32,7 +32,7 @@ export default class BoardController {
 		try {
 			// Si existe el tablero, devuelvo sus datos.
 			const board = await getRepository(Board).findOneOrFail(id, {
-				relations: ['project', 'circuits', 'board_hijos'],
+				relations: ['project', 'circuits', 'board_padre','board_hijos'],
 			});
 			res.json(board);
 		} catch (error) {
