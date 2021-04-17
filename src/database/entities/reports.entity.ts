@@ -21,18 +21,18 @@ export default class Report extends UuidEntity {
 	public current?: number;
 
 	@Column({
-		type: 'double',
-		unsigned: true,
+		type: 'varchar',
+		length: 5,
 		comment: 'Anchura del cable.',
-		default: 0,
+		nullable: true,
 	})
 	public cable_width?: number;
 
 	@Column({
-		type: 'double',
-		unsigned: true,
+		type: 'varchar',
+		length: 5,
 		comment: 'Diametro de la tuberia.',
-		default: 0,
+		nullable: true,
 	})
 	public pipe_diameter?: number;
 

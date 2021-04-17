@@ -11,6 +11,7 @@ import {
 	s21,
 	b161Y,
 	b161X,
+	pipe
 } from '../config/tableCalculate';
 
 // ======================================
@@ -304,7 +305,7 @@ export default class CircuitController {
 		let PosicionX: number;
 		if (PosicionY != -1) {
 			const fila = b161X[PosicionY].reverse();
-			PosicionX = fila.find((elem) => elem > D184);
+			PosicionX = fila.findIndex((elem) => elem >= D184);
 		} else
 			return res.status(401).json({
 				message:
@@ -314,7 +315,7 @@ export default class CircuitController {
 		const calculos = {
 			current: E102,
 			cable_width: CalibreSelecc,
-			pipe_diameter: PosicionX,
+			pipe_diameter: pipe[PosicionX],
 			protection_device: Protecc,
 			voltage_drop: DV,
 		};
