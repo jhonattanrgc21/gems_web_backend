@@ -76,6 +76,14 @@ export default class User extends UuidEntity {
 	public profesionalID?: number;
 
 	@Column({
+		type: 'varchar',
+		length: 191,
+		comment: 'Nombre del lugar de trabajo..',
+		nullable: true,
+	})
+	public company?: string;
+
+	@Column({
 		type: 'boolean',
 		comment: 'Estatus para el registro.',
 		default: false,

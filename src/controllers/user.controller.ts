@@ -20,6 +20,7 @@ export default class UserController {
 				'first_name',
 				'last_name',
 				'profesionalID',
+				'company',
 				'phone',
 				'status',
 			],
@@ -161,8 +162,10 @@ export default class UserController {
 			entity.profesionalID = input.profesionalID
 				? input.profesionalID
 				: entity.profesionalID;
+			entity.company = input.company ? input.company : entity.company;
 			entity.status = input.status ? input.status : entity.status;
 			entity.country = input.country ? input.country : entity.country;
+
 		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, el usuario no esta registrado.',

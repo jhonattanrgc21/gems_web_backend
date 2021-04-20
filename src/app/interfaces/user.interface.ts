@@ -20,6 +20,7 @@ export interface UpdateUserInterface {
 	phone?: string;
 	address?: string;
 	profesionalID?: number;
+	company?: string;
 	status?: boolean;
 	country?: Country;
 }
