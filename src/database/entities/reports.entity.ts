@@ -26,7 +26,7 @@ export default class Report extends UuidEntity {
 		comment: 'Anchura del cable.',
 		nullable: true,
 	})
-	public cable_width?: number;
+	public cable_width?: string;
 
 	@Column({
 		type: 'varchar',
@@ -34,7 +34,7 @@ export default class Report extends UuidEntity {
 		comment: 'Diametro de la tuberia.',
 		nullable: true,
 	})
-	public pipe_diameter?: number;
+	public pipe_diameter?: string;
 
 	@Column({
 		type: 'double',

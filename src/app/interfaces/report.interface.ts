@@ -5,8 +5,8 @@ import Circuit from '../../database/entities/circuits.entity';
 // ======================================
 export interface ReportInterface {
 	current?: number;
-	cable_width?: number;
-	pipe_diameter?: number;
+	cable_width?: string;
+	pipe_diameter?: string;
 	protection_device?: number;
 	voltaje_drop?: number;
 	circuit: Circuit;
