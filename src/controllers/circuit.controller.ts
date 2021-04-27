@@ -1,118 +1,34 @@
-import { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { Router } from 'express';
 
-import Circuit from '../database/entities/circuits.entity';
+// ======================================
+//			Servicess
+// ======================================
+import CircuitServices from '../services/circuit.service';
 
-import { CircuitInterface } from '../app/interfaces/circuit.interface';
+// ======================================
+//			Middlewares
+// ======================================
+import { checkJwt } from '../app/middlewares/auth.middleware';
 
 // ======================================
 //			Circuit Controller
 // ======================================
-export default class CircuitController {
-	static getAll = async (req: Request, res: Response) => {
-		let circuits;
+const routes = Router();
+const services = new CircuitServices();
 
-		// Verifico si existen circuitos
-		circuits = await getRepository(Circuit).find({
-			relations: ['board_padre', 'reports'],
-		});
+// Crear un circuito
+routes.post('/', [checkJwt], services.created);
 
-		if (circuits.length)
-			// Si hay circuitos, devuelvo sus nombres
-			res.json(circuits);
-		else
-			return res.status(404).json({
-				message: 'Error, no existen circuitos registrados.',
-			});
-	};
+// Obtener todos los circuitos
+routes.get('/', [checkJwt], services.findAll);
 
-	static getById = async (req: Request, res: Response) => {
-		const { id } = req.params;
-		try {
-			// Si existe el circuito, devuelvo sus datos.
-			const report = await getRepository(Circuit).findOneOrFail(id, {
-				relations: ['board_padre', 'reports'],
-			});
-			res.json(report);
-		} catch (error) {
-			return res.status(404).json({
-				message: 'Error, este circuito no esta registrado.',
-			});
-		}
-	};
+// Obtener un solo circuito
+routes.get('/:id', [checkJwt], services.findById);
 
-	static newCircuit = async (req: Request, res: Response) => {
-		const input: CircuitInterface = req.body;
-		let circuit = new Circuit();
+// Actualizar un circuito
+routes.patch('/:id', [checkJwt], services.updated);
 
-		// Validando los datos que vienen del front
-		if (!input.name)
-			return res
-				.status(400)
-				.json({ message: 'Error, el nombre es requerido.' });
+// Eliminar un circuito
+routes.delete('/:id', [checkJwt], services.deleted);
 
-		circuit.name = input.name;
-		circuit.board_padre = input.board_padre;
-
-		try {
-			// Si no hay errores, guardo el registro
-			await getRepository(Circuit).save(circuit);
-		} catch (error) {
-			return res.status(401).json({
-				message: 'Error, no se pudo guardar el registro del circuito.',
-			});
-		}
-
-		res.status(201).json({
-			message: 'Circuito registrado con exito.',
-		});
-	};
-
-	static editCircuit = async (req: Request, res: Response) => {
-		const { id } = req.params;
-		const input: CircuitInterface = req.body;
-
-		let circuit: Circuit;
-		try {
-			// Si existe el circuito, actualizo sus datos.
-			circuit = await getRepository(Circuit).findOneOrFail(id);
-			circuit.name = input.name ? input.name : circuit.name;
-		} catch (error) {
-			return res.status(404).json({
-				message: 'Error, el circuito no existe.',
-			});
-		}
-
-		try {
-			// Si no hay errores, guardo el registro del circuito
-			await getRepository(Circuit).save(circuit);
-		} catch (error) {
-			return res.status(401).json({
-				message: 'Error, algo salio mal.',
-			});
-		}
-
-		return res
-			.status(201)
-			.json({ message: 'Circuito actualizado con exito.' });
-	};
-
-	static deleteCircuit = async (req: Request, res: Response) => {
-		const { id } = req.params;
-
-		try {
-			// Verifico si el circuito existe.
-			await getRepository(Circuit).findOneOrFail(id);
-		} catch (error) {
-			return res.status(404).json({
-				message: 'Error, este circuito no existe.',
-			});
-		}
-
-		await getRepository(Circuit).delete(id);
-
-		res.status(201).json({
-			message: 'Circuito eliminado con exito.',
-		});
-	};
-}
+export default routes;

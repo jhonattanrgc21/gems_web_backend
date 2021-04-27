@@ -1,0 +1,35 @@
+// Variables
+@localhost = http://localhost:4000
+
+### Crear un usuario
+POST {{localhost}}/user
+Content-Type: application/json
+
+{
+	"username": "maria123",
+	"email": "bio.gabs.b@gmail.com",
+	"password": "123456",
+	"first_name": "Maria",
+	"last_name": "Barrios",
+	"phone": "0424"
+}
+
+### Buscar todos los usuarios
+GET {{localhost}}/user
+
+### Buscar un usuario por ID
+GET {{localhost}}/user/
+
+### Actualizar un usuario
+PATCH {{localhost}}/user/
+Content-Type: application/json
+
+// Objeto que se envia al servidor
+// Se debe colocar el atributo a modificar y su valor
+{
+	"first_name": "Jhonattan",
+	"last_name": "Garcia"
+}
+
+### Eliminar un usuario
+DELETE {{localhost}}/user/
