@@ -1,0 +1,37 @@
+// Variables
+@localhost = http://localhost:4000/board
+
+### Crear un tablero
+POST {{localhost}}
+Content-Type: application/json
+// Aqui va el auth-token: token
+
+// Objeto que se envia al servidor
+{
+	"name": "",
+	"project": {},
+	"board_padre": {}
+}
+
+### Buscar todos los tableros
+GET {{localhost}}
+// Aqui va el auth-token: token
+
+### Buscar un tablero por ID
+GET {{localhost}}/
+// Aqui va el auth-token: token
+
+### Actualizar un tablero
+PATCH {{localhost}}/
+Content-Type: application/json
+// Aqui va el auth-token: token
+
+// Objeto que se envia al servidor
+{
+	"name": "",
+	"project": {},
+	"board_padre": {}
+}
+
+### Eliminar un tablero
+DELETE {{localhost}}/

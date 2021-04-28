@@ -1,0 +1,76 @@
+// Variables
+@localhost = http://localhost:4000/auth
+
+### Registra un usuario y envia correo de confirmacion
+POST {{localhost}}/register
+Content-Type: application/json
+
+{
+	"username": "maria123",
+	"email": "bio.gabs.b@gmail.com",
+	"password": "123456",
+	"first_name": "Maria",
+	"last_name": "Barrios",
+	"phone": "0424",
+	"idioma": ""
+}
+
+### Actualiza el status de registro del usuario
+POST {{localhost}}/verifyUser
+Content-Type: application/json
+// aqui va el confirm: token
+
+
+### Reenvia el correo de verificacion de registro del usuario
+POST {{localhost}}/resend-verificatio
+Content-Type: application/json
+
+// Objeto que se envia al servidor
+{
+	"email": "",
+	"idioma": ""
+}
+
+### Iniciar sesion
+POST {{localhost}}/login
+Content-Type: application/json
+
+// Objeto que se envia al servidor
+{
+	"email": "",
+	"password": ""
+}
+
+
+### Cambiar contraseña dentro de la sesion del usuario
+POST {{localhost}}/change-password
+Content-Type: application/json
+// aqui va el auth-token: token
+
+// Objeto que se envia al servidor
+{
+	"password": "",
+	"newPassword": ""
+}
+
+### Olvide la contraseña para iniciar sesion
+PUT {{localhost}}/forgot-password
+Content-Type: application/json
+
+// Objeto que se envia al servidor
+{
+	"email": ""
+}
+
+### Ccrear nueva contraseña para iniciar sesion
+PUT {{localhost}}/new-password
+Content-Type: application/json
+// aqui va el reset: token
+
+// Objeto que se envia al servidor
+{
+	"password": "",
+	"confirmPassword": "",
+	"idioma": ""
+}
+

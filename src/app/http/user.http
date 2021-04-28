@@ -1,8 +1,8 @@
 // Variables
-@localhost = http://localhost:4000
+@localhost = http://localhost:4000/user
 
 ### Crear un usuario
-POST {{localhost}}/user
+POST {{localhost}}
 Content-Type: application/json
 
 {
@@ -15,13 +15,13 @@ Content-Type: application/json
 }
 
 ### Buscar todos los usuarios
-GET {{localhost}}/user
+GET {{localhost}}
 
 ### Buscar un usuario por ID
-GET {{localhost}}/user/
+GET {{localhost}}/
 
 ### Actualizar un usuario
-PATCH {{localhost}}/user/
+PATCH {{localhost}}/
 Content-Type: application/json
 
 // Objeto que se envia al servidor
@@ -32,4 +32,4 @@ Content-Type: application/json
 }
 
 ### Eliminar un usuario
-DELETE {{localhost}}/user/
+DELETE {{localhost}}/

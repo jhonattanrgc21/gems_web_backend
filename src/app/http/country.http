@@ -1,0 +1,8 @@
+// Variables
+@localhost = http://localhost:4000/country
+
+### Buscar todos los usuarios
+GET {{localhost}}
+
+### Buscar un usuario por ID
+GET {{localhost}}/

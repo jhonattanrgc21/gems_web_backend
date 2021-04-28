@@ -1,0 +1,35 @@
+// Variables
+@localhost = http://localhost:4000/circuit
+
+### Crear un circuito
+POST {{localhost}}
+Content-Type: application/json
+// Aqui va el auth-token: token
+
+// Objeto que se envia al servidor
+{
+	"name": "",
+	"board_padre": {}
+}
+
+### Buscar todos los circuitos
+GET {{localhost}}
+// Aqui va el auth-token: token
+
+### Buscar un circuito por ID
+GET {{localhost}}/
+// Aqui va el auth-token: token
+
+### Actualizar un circuito
+PATCH {{localhost}}/
+Content-Type: application/json
+// Aqui va el auth-token: token
+
+// Objeto que se envia al servidor
+{
+	"name": "",
+	"board_padre": {}
+}
+
+### Eliminar un circuito
+DELETE {{localhost}}/

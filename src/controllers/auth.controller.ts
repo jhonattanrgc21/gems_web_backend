@@ -20,7 +20,7 @@ const services = new AuthServices();
 routes.post('/register', services.register);
 
 // Confirmar registros de usuarios
-routes.post('/verifyUser', services.verifyUser);
+routes.post('/verifyUser', checkJwt,services.verifyUser);
 
 // Reenviar correo de verificacion
 routes.post('/resend-verification', services.resendVerification);
