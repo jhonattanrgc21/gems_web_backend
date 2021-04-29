@@ -3,7 +3,7 @@ import Country from "../../database/entities/countries.entity";
 // ======================================
 //			User Interface
 // ======================================
-export interface CreateUserInterface {
+export interface RegisterUserInterface {
 	username: string;
 	email: string;
 	password: string;
@@ -11,6 +11,15 @@ export interface CreateUserInterface {
 	last_name: string;
 	profesionalID?: number;
 	phone?: string;
+	idioma: string;
+}
+
+export interface CreateUserInterface {
+	username: string;
+	email: string;
+	password: string;
+	first_name: string;
+	last_name: string;
 }
 
 export interface UpdateUserInterface {

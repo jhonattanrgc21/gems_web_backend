@@ -20,6 +20,15 @@ routes.get('/', services.findAll);
 // Obtener un solo usuario
 routes.get('/:id', services.findById);
 
+// Buscar usuario por email
+routes.post('/verifyEmail', services.findByEmail);
+
+// Buscar usuario por username
+routes.post('/verifyUsername', services.findByUsername);
+
+// Buscar usuario por profesionalID
+routes.post('/verifyProfesionalID', services.findByProfesionalID);
+
 // Actualizar un usuario
 routes.patch('/:id', services.updated);
 

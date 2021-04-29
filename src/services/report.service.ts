@@ -32,12 +32,16 @@ export default class CircuitServices {
 				input.cable_width &&
 				input.pipe_diameter &&
 				input.protection_device &&
-				input.voltaje_drop
+				input.voltaje_drop &&
+				input.circuit
 			)
 		)
 			return res
 				.status(400)
-				.json({ message: 'Todos los campos son requeridod.' });
+				.json({
+					message:
+						'Todos los campos son requeridod y es necesario los datos del circuito padre.',
+				});
 
 		report.current = input.current;
 		report.cable_width = input.cable_width;

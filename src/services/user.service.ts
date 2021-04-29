@@ -16,6 +16,7 @@ export default class UserServices {
 	public async created(req: Request, res: Response) {
 		const input: CreateUserInterface = req.body;
 		let user;
+
 		// Validando los datos que vienen del front
 		if (
 			!(
@@ -23,51 +24,12 @@ export default class UserServices {
 				input.email &&
 				input.password &&
 				input.first_name &&
-				input.last_name &&
-				input.phone
+				input.last_name
 			)
 		)
 			return res
 				.status(400)
 				.json({ message: 'Todos los campos son requeridos.' });
-
-		// Validando por username
-		user = await getRepository(User).findOne({ username: input.username });
-		if (user)
-			return res.status(409).json({
-				message: 'Error, ya existe un usuario con este username.',
-			});
-
-		// Validando por email
-		user = await getRepository(User).findOne({ email: input.email });
-		if (user)
-			return res.status(409).json({
-				message: 'Error, ya existe un usuario con este email.',
-			});
-
-		if (input.profesionalID) {
-			// Validando por profesionalID
-			user = await getRepository(User).findOne({
-				profesionalID: input.profesionalID
-			});
-			if (user)
-				return res.status(409).json({
-					message:
-						'Error, ya existe un usuario con este profesionalID.',
-				});
-		}
-
-		if (input.phone) {
-			// Validando por numero de telefono
-			user = await getRepository(User).findOne({
-				phone: input.phone
-			});
-			if (user)
-				return res.status(409).json({
-					message:
-						'Error, ya existe un usuario con este numero de telefono.',
-				});
-		}
 
 		let entity = new User();
 		entity.username = input.username;
@@ -75,24 +37,22 @@ export default class UserServices {
 		entity.password = input.password;
 		entity.first_name = input.first_name;
 		entity.last_name = input.last_name;
-		entity.profesionalID = input.profesionalID ? input.profesionalID : null;
-		entity.phone = input.phone ? input.phone : null;
 		entity.status = true;
 
 		try {
 			// Si no hay errores, guardo el registro de Usuario
 			entity.encryptPassword();
 			await getRepository(User).save(entity);
+
+			res.status(201).json({
+				message: 'Usuario registrado con exito.',
+			});
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, no se pudo guardar el registro del usuario..',
 			});
 		}
-
-		res.status(201).json({
-			message: 'Usuario registrado con exito.',
-		});
 	}
 
 	// ======================================
@@ -134,6 +94,66 @@ export default class UserServices {
 				relations: ['country', 'projects'],
 			});
 			delete user.password;
+			delete user.confirmToken;
+			delete user.resetToken;
+			res.json(user);
+		} catch (error) {
+			return res.status(404).json({
+				message: 'Error, este usuario no existe.',
+			});
+		}
+	}
+
+	// ======================================
+	//		Buscar Usuario Por Email
+	// ======================================
+	public async findByEmail(req: Request, res: Response) {
+		const email: string = req.body.email;
+		try {
+			// Si existe el usuario, devuelvo sus datos.
+			const user = await getRepository(User).findOneOrFail({ email });
+			delete user.password;
+			delete user.confirmToken;
+			delete user.resetToken;
+		} catch (error) {
+			return res.status(404).json({
+				message: 'Error, este usuario no existe.',
+			});
+		}
+	}
+
+	// ======================================
+	//		Buscar Usuario Por Username
+	// ======================================
+	public async findByUsername(req: Request, res: Response) {
+		const username: string = req.body.username;
+		try {
+			// Si existe el usuario, devuelvo sus datos.
+			const user = await getRepository(User).findOneOrFail({ username });
+			delete user.password;
+			delete user.confirmToken;
+			delete user.resetToken;
+			res.json(user);
+		} catch (error) {
+			return res.status(404).json({
+				message: 'Error, este usuario no existe.',
+			});
+		}
+	}
+
+	// ======================================
+	//	Buscar Usuario Por ProfesionalID
+	// ======================================
+	public async findByProfesionalID(req: Request, res: Response) {
+		const profesionalID: number = req.body.profesionalID;
+		try {
+			// Si existe el usuario, devuelvo sus datos.
+			const user = await getRepository(User).findOneOrFail({
+				profesionalID,
+			});
+			delete user.password;
+			delete user.confirmToken;
+			delete user.resetToken;
 			res.json(user);
 		} catch (error) {
 			return res.status(404).json({

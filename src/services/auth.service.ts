@@ -3,6 +3,7 @@ import { getRepository } from 'typeorm';
 import jwt from 'jsonwebtoken';
 import User from '../database/entities/users.entity';
 import { transporter } from '../config/mailer';
+import { RegisterUserInterface } from '../app/interfaces/user.interface';
 
 // ======================================
 //			Auth Service
@@ -12,17 +13,7 @@ export default class AuthServices {
 	//		Registrar Usuario
 	// ======================================
 	public async register(req: Request, res: Response) {
-		let {
-			username,
-			email,
-			password,
-			first_name,
-			last_name,
-			profesionalID,
-			phone,
-			idioma,
-		} = req.body;
-
+		let input: RegisterUserInterface = req.body;
 		let user;
 		const message =
 			'Revise su correo electrónico para obtener un enlace para confirmar su registro.';
@@ -31,68 +22,35 @@ export default class AuthServices {
 		// Validando que vienen datos del Front-End
 		if (
 			!(
-				username &&
-				email &&
-				password &&
-				first_name &&
-				last_name &&
-				phone &&
-				idioma
+				input.username &&
+				input.email &&
+				input.password &&
+				input.first_name &&
+				input.last_name &&
+				input.phone &&
+				input.idioma
 			)
 		)
 			return res
 				.status(400)
 				.json({ message: 'Todos los campos son requeridos.' });
 
-		if (idioma != 'es' && idioma != 'en')
+		if (input.idioma != 'es' && input.idioma != 'en')
 			res.status(400).json({
 				message: 'Error, el idioma no es valido.',
 			});
 
-		// Validando por username
-		user = await getRepository(User).findOne({ username });
-		if (user)
-			return res.status(409).json({
-				message: 'Error, ya existe un usuario con este username.',
-			});
-
-		// Validando por email
-		user = await getRepository(User).findOne({ email });
-		if (user)
-			return res.status(409).json({
-				message: 'Error, ya existe un usuario con este email.',
-			});
-
-		if (profesionalID) {
-			// Validando por profesionalID
-			user = await getRepository(User).findOne({ profesionalID });
-			if (user)
-				return res.status(409).json({
-					message:
-						'Error, ya existe un usuario con este profesionalID.',
-				});
-		}
-
-		if (phone) {
-			// Validando por numero de telefono
-			user = await getRepository(User).findOne({ phone });
-			if (user)
-				return res.status(409).json({
-					message:
-						'Error, ya existe un usuario con este numero de telefono.',
-				});
-		}
-
 		let entity = new User();
-		entity.username = username;
-		entity.email = email;
-		entity.password = password;
-		entity.first_name = first_name;
-		entity.last_name = last_name;
-		entity.profesionalID = profesionalID ? profesionalID : null;
-		entity.phone = phone;
+		entity.username = input.username;
+		entity.email = input.email;
+		entity.password = input.password;
+		entity.first_name = input.first_name;
+		entity.last_name = input.last_name;
+		entity.profesionalID = input.profesionalID ? input.profesionalID : null;
+		entity.phone = input.phone;
 
-		// Genero un nuevo token que expira en 10 minutos para cambiar la contraseña
+		/*  Genero un nuevo token que expira en 10 minutos
+			para cambiar la contraseña */
 		const token = jwt.sign(
 			{ id: entity.id, email: entity.email },
 			process.env.SECRET_KEY_RESET || 'JG-DEV123',
@@ -113,13 +71,11 @@ export default class AuthServices {
 			});
 		}
 
-		/*
-			En esta seccion se procede a enviar el correo de confirmacion
-		*/
+		// Procedo a enviar el correo de confirmacion
 		let texto: string;
 		let asunto: string;
 
-		if (idioma === 'en') {
+		if (input.idioma === 'en') {
 			texto =
 				'Please click on the following link or place it in your browser to complete the registration process:';
 			asunto = 'Confirmation of registration';
@@ -176,7 +132,7 @@ export default class AuthServices {
 			});
 
 		user.status = true;
-
+		user.confirmToken = null;
 		try {
 			// Si no hay errores, guardo el registro de Usuario
 			await getRepository(User).save(user);
@@ -494,10 +450,11 @@ export default class AuthServices {
 		}
 
 		user.password = password;
-		console.log(user.password);
+		user.resetToken = null
+		user.encryptPassword();
+
 		try {
 			// Si no hay errores, guardo el registro de Usuario
-			user.encryptPassword();
 			await getRepository(User).save(user);
 		} catch (error) {
 			// En caso contrario, envio un error.
