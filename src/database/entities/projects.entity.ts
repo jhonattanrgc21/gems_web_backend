@@ -1,14 +1,13 @@
+import Board from './boards.entity';
 import {
-	Index,
-	Entity,
 	Column,
-	ManyToOne,
+	Entity,
+	Index,
 	JoinColumn,
-	PrimaryGeneratedColumn,
+	ManyToOne,
 	OneToMany
 } from 'typeorm';
 import User from './users.entity';
-import Board from './boards.entity';
 import UuidEntity from './uuid.entity';
 
 // ======================================

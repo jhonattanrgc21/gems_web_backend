@@ -1,8 +1,8 @@
 import {
 	BaseEntity,
 	CreateDateColumn,
-	UpdateDateColumn,
 	PrimaryGeneratedColumn,
+	UpdateDateColumn,
 } from 'typeorm';
 
 export default class UuidEntity extends BaseEntity {

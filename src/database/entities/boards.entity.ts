@@ -1,14 +1,12 @@
+import Circuit from './circuits.entity';
+import Project from './projects.entity';
 import {
 	Column,
 	Entity,
 	JoinColumn,
 	ManyToOne,
-	OneToMany,
-	PrimaryGeneratedColumn,
+	OneToMany
 } from 'typeorm';
-
-import Circuit from './circuits.entity';
-import Project from './projects.entity';
 import UuidEntity from './uuid.entity';
 
 // ======================================

@@ -14,55 +14,55 @@ export default class BoardServices {
 	// ======================================
 	public async created(req: Request, res: Response) {
 		const input: BoardInterface = req.body;
-
 		const id_user = res.locals.jwtPayload.id;
+		let project: Project;
+
+		// Busco al usuario y proyecto asociado a este tablero
 		const user = await getRepository(User).findOne(id_user);
 
-		const project = await getRepository(Project).findOne(input.project.id, {
-			where: { user },
-			relations: ['boards'],
-		});
-
-		if (project) {
-			// Validando que los datos que vienen del Front-End
-			if (!input.name)
-				return res
-					.status(400)
-					.json({ message: 'El nombre es requerido.' });
-
-			const board = new Board();
-			board.name = input.name;
-			board.project = input.project;
-
-			// Comprobando si existe un tablero padre
-			if (input.board_padre) {
-				let encontrado = false,
-					i = 0;
-				const n = project.boards.length;
-
-				while (i < n && !encontrado) {
-					if (project.boards[i].id === input.board_padre.id)
-						encontrado = true;
-					else i++;
-				}
-
-				if (encontrado) board.board_padre = input.board_padre;
-				else
-					return res.status(401).json({
-						message: 'Error, no se encontro el tablero asociado.',
-					});
-			}
-
-			await getRepository(Board).save(board);
-
-			return res.status(201).json({
-				message: 'Tablero registrado con exito.',
+		// Validando que los datos que vienen del Front-End
+		if (!input.project.id && !input.name)
+			return res.status(401).json({
+				message:
+					'Error, el proyecto asociado no existe o el nombre del tablero es requerido.',
 			});
-		} else {
+
+		try {
+			project = await getRepository(Project).findOneOrFail(
+				input.project.id,
+				{
+					where: { user },
+					relations: ['boards'],
+				},
+			);
+		} catch (error) {
 			return res.status(401).json({
 				message: 'Error, no se encontro el proyecto asociado.',
 			});
 		}
+
+		const board = new Board();
+		board.name = input.name;
+		board.project = input.project;
+
+		// Comprobando si existe un tablero padre
+		if (input.board_padre) {
+			let encontrado = project.boards.find(
+				(elem) => elem.id === input.board_padre.id,
+			);
+			if (encontrado) board.board_padre = input.board_padre;
+			else
+				return res.status(401).json({
+					message: 'Error, no se encontro el tablero asociado.',
+				});
+		}
+
+		await getRepository(Board).save(board);
+
+		return res.status(201).json({
+			message: 'Tablero registrado con exito.',
+			board,
+		});
 	}
 
 	// ======================================
@@ -89,7 +89,7 @@ export default class BoardServices {
 	//			Buscar Tablero Por ID
 	// ======================================
 	public async findById(req: Request, res: Response) {
-		const { id } = req.params;
+		const id: string = req.params.id;
 
 		try {
 			// Si existe el tablero, devuelvo sus datos.
@@ -113,14 +113,21 @@ export default class BoardServices {
 	//			Actualizar Tablero
 	// ======================================
 	public async updated(req: Request, res: Response) {
-		const { id } = req.params;
+		const id: string = req.params.id;
 		const input: BoardInterface = req.body;
 		const id_user = res.locals.jwtPayload.id;
+		let project: Project;
 
+		// Busco al usuario correspondiente
 		const user = await getRepository(User).findOne(id_user);
+		if (!input.project.id)
+			return res.status(401).json({
+				message: 'Error, el proyecto asociado no existe.',
+			});
 
+		// Busco al proyecto asociado
 		try {
-			const project = await getRepository(Project).findOneOrFail(
+			project = await getRepository(Project).findOneOrFail(
 				input.project.id,
 				{
 					where: { user },
@@ -136,40 +143,48 @@ export default class BoardServices {
 		let board: Board;
 		try {
 			// Si existe el tablero, actualizo sus datos.
-			board = await getRepository(Board).findOneOrFail(id);
+			board = await getRepository(Board).findOneOrFail(id, {
+				where: { project },
+				relations: [
+					'project',
+					'circuits',
+					'board_padre',
+					'board_hijos',
+				],
+			});
 			board.name = input.name ? input.name : board.name;
+
+			// Guardo el registro
+			await getRepository(Board).save(board);
+			return res
+				.status(201)
+				.json({ message: 'Tablero actualizado con exito.', board });
 		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, el tablero no esta registrado.',
 			});
 		}
-
-		await getRepository(Board).save(board);
-
-		return res
-			.status(201)
-			.json({ message: 'Tablero actualizado con exito.' });
 	}
 
 	// ======================================
 	//			Eliminar Tablero
 	// ======================================
 	public async deleted(req: Request, res: Response) {
-		const { id } = req.params;
-
+		const id: string = req.params.id;
+		let board: Board;
 		try {
 			// Verifico si el tablero existe.
-			await getRepository(Board).findOneOrFail(id);
+			board = await getRepository(Board).findOneOrFail(id);
+			await getRepository(Board).delete(id);
+
+			return res.status(201).json({
+				message: 'Tablero eliminado con exito.',
+				board,
+			});
 		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, el tablero no existe.',
 			});
 		}
-
-		await getRepository(Board).delete(id);
-
-		return res.status(201).json({
-			message: 'Tablero eliminado con exito.',
-		});
 	}
 }

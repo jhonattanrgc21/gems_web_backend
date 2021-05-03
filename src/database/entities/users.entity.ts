@@ -1,15 +1,14 @@
-import {
-	Index,
-	Entity,
-	Column,
-	PrimaryGeneratedColumn,
-	OneToMany,
-	ManyToOne,
-	JoinColumn
-} from 'typeorm';
 import bcrypt from 'bcryptjs';
-import Project from './projects.entity';
 import Country from './countries.entity';
+import Project from './projects.entity';
+import {
+	Column,
+	Entity,
+	Index,
+	JoinColumn,
+	ManyToOne,
+	OneToMany,
+} from 'typeorm';
 import UuidEntity from './uuid.entity';
 
 // ======================================
@@ -20,7 +19,7 @@ export default class User extends UuidEntity {
 	@Index('user_username_unique', { unique: true })
 	@Column({
 		type: 'varchar',
-		length: 15,
+		length: 20,
 	})
 	public username!: string;
 
@@ -51,7 +50,6 @@ export default class User extends UuidEntity {
 	})
 	public last_name!: string;
 
-	@Index('user_phone_unique', { unique: true })
 	@Column({
 		type: 'varchar',
 		length: 20,
@@ -84,30 +82,23 @@ export default class User extends UuidEntity {
 	public company?: string;
 
 	@Column({
-		type: 'boolean',
-		comment: 'Estatus para el registro.',
-		default: false,
+		type: 'bool',
+		comment: 'Estatus del registro.',
+		default: 0,
 		nullable: true,
 	})
 	public status?: boolean;
 
 	@Column({
 		type: 'text',
-		comment: 'Código.',
-		nullable: true,
-	})
-	public code?: string;
-
-	@Column({
-		type: 'text',
-		comment: 'Confirmacion de token.',
+		comment: 'Token de confirmacion.',
 		nullable: true,
 	})
 	public confirmToken?: string;
 
 	@Column({
 		type: 'text',
-		comment: 'Reseteo de token.',
+		comment: 'Token de recuperacion.',
 		nullable: true,
 	})
 	public resetToken?: string;

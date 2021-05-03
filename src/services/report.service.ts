@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import Report from '../database/entities/reports.entity';
-import { ReportInterface } from '../app/interfaces/report.interface';
+import Circuit from '../database/entities/circuits.entity';
+import {
+	CreateReportInterface,
+	UpdateReportInterface,
+} from '../app/interfaces/report.interface';
 import {
 	tableCorrectionFactors,
 	tableTemperature,
@@ -22,7 +26,7 @@ export default class CircuitServices {
 	//			Crear Reporte
 	// ======================================
 	public async created(req: Request, res: Response) {
-		const input: ReportInterface = req.body;
+		const input: CreateReportInterface = req.body;
 		let report = new Report();
 
 		// Validando que vienen datos del Front-End
@@ -32,35 +36,42 @@ export default class CircuitServices {
 				input.cable_width &&
 				input.pipe_diameter &&
 				input.protection_device &&
-				input.voltaje_drop &&
-				input.circuit
+				input.voltage_drop &&
+				input.circuit.id
 			)
 		)
-			return res
-				.status(400)
-				.json({
-					message:
-						'Todos los campos son requeridod y es necesario los datos del circuito padre.',
-				});
+			return res.status(400).json({
+				message:
+					'Todos los campos son requeridod y es necesario los datos del circuito padre.',
+			});
+
+		try {
+			await getRepository(Circuit).findOneOrFail(input.circuit.id);
+		} catch (error) {
+			return res.status(401).json({
+				message: 'Error, el circuito padre no existe.',
+			});
+		}
 
 		report.current = input.current;
 		report.cable_width = input.cable_width;
 		report.pipe_diameter = input.pipe_diameter;
 		report.protection_device = input.protection_device;
-		report.voltaje_drop = input.voltaje_drop;
+		report.voltaje_drop = input.voltage_drop;
 		report.circuit = input.circuit;
 
 		try {
 			// Si no hay errores, guardo el registro
 			await getRepository(Report).save(report);
+			res.status(201).json({
+				message: 'Reporte registrado con exito.',
+				report,
+			});
 		} catch (error) {
 			return res.status(401).json({
 				message: 'Error, no se pudo guardar el registro del reporte.',
 			});
 		}
-		res.status(201).json({
-			message: 'Reporte registrado con exito.',
-		});
 	}
 
 	// ======================================
@@ -397,18 +408,41 @@ export default class CircuitServices {
 	//			Actualizar Reporte
 	// ======================================
 	public async updated(req: Request, res: Response) {
-		const { id } = req.params;
-		const input: ReportInterface = req.body;
-
+		const id: string = req.params.id;
+		const input: UpdateReportInterface = req.body;
+		let circuit: Circuit;
 		let report: Report;
+
+		try {
+			circuit = await getRepository(Circuit).findOneOrFail(
+				input.circuit.id,
+			);
+		} catch (error) {
+			return res.status(401).json({
+				message: 'Error, el circuito padre no existe.',
+			});
+		}
+
 		try {
 			// Si existe el report, actualizo sus datos.
-			report = await getRepository(Report).findOneOrFail(id);
-			report.current = input.current;
-			report.cable_width = input.cable_width;
-			report.pipe_diameter = input.pipe_diameter;
-			report.protection_device = input.protection_device;
-			report.voltaje_drop = input.voltaje_drop;
+			report = await getRepository(Report).findOneOrFail(id, {
+				where: { circuit },
+				relations: ['circuit'],
+			});
+
+			report.current = input.current ? input.current : report.current;
+			report.cable_width = input.cable_width
+				? input.cable_width
+				: report.cable_width;
+			report.pipe_diameter = input.pipe_diameter
+				? input.pipe_diameter
+				: report.pipe_diameter;
+			report.protection_device = input.protection_device
+				? input.protection_device
+				: report.protection_device;
+			report.voltaje_drop = input.voltage_drop
+				? input.voltage_drop
+				: report.voltaje_drop;
 		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, el reporte no existe.',
@@ -418,38 +452,39 @@ export default class CircuitServices {
 		try {
 			// Si no hay errores, guardo el registro de Usuario
 			await getRepository(Report).save(report);
+			res.status(201).json({
+				message: 'Reporte actualizado con exito.',
+				report,
+			});
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(401).json({
 				message: 'Error, algo salio mal.',
 			});
 		}
-
-		return res
-			.status(201)
-			.json({ message: 'Reporte actualizado con exito.' });
 	}
 
 	// ======================================
 	//			Eliminar Reporte
 	// ======================================
 	public async deleted(req: Request, res: Response) {
-		const { id } = req.params;
-
+		const id: string = req.params.id;
+		let report: Report;
 		try {
 			// Verifico si el reporte existe.
-			await getRepository(Report).findOneOrFail(id);
+			report = await getRepository(Report).findOneOrFail(id);
+
+			// Elimino el registro del reporte
+			await getRepository(Report).delete(id);
+			res.status(201).json({
+				message: 'Reporte eliminado con exito.',
+				report,
+			});
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(404).json({
 				message: 'Error, este reporte no existe.',
 			});
 		}
-
-		await getRepository(Report).delete(id);
-
-		res.status(201).json({
-			message: 'Reporte eliminado con exito.',
-		});
 	}
 }

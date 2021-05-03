@@ -1,11 +1,10 @@
+import Circuit from './circuits.entity';
 import {
 	Entity,
 	Column,
 	ManyToOne,
 	JoinColumn,
-	PrimaryGeneratedColumn,
 } from 'typeorm';
-import Circuit from './circuits.entity';
 import UuidEntity from './uuid.entity';
 
 // ======================================
@@ -14,43 +13,47 @@ import UuidEntity from './uuid.entity';
 @Entity('reports')
 export default class Report extends UuidEntity {
 	@Column({
-		type: 'double',
+		type: 'float',
+		precision: 10,
+		scale: 2,
 		unsigned: true,
 		default: 0,
 	})
-	public current?: number;
+	public current: number;
 
 	@Column({
 		type: 'varchar',
 		length: 5,
 		comment: 'Anchura del cable.',
-		nullable: true,
 	})
-	public cable_width?: string;
+	public cable_width: string;
 
 	@Column({
 		type: 'varchar',
 		length: 5,
-		comment: 'Diametro de la tuberia.',
-		nullable: true,
+		comment: 'Diametro de la tuberia.'
 	})
-	public pipe_diameter?: string;
+	public pipe_diameter: string;
 
 	@Column({
-		type: 'double',
+		type: 'float',
+		precision: 10,
+		scale: 2,
 		unsigned: true,
 		comment: 'Dispositivo de proteccion.',
 		default: 0,
 	})
-	public protection_device?: number;
+	public protection_device: number;
 
 	@Column({
-		type: 'double',
+		type: 'float',
+		precision: 10,
+		scale: 2,
 		unsigned: true,
 		comment: 'Caida de voltaje.',
 		default: 0,
 	})
-	public voltaje_drop?: number;
+	public voltaje_drop: number;
 
 	// ======================================
 	//			RelationShips

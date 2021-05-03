@@ -43,9 +43,12 @@ export default class UserServices {
 			// Si no hay errores, guardo el registro de Usuario
 			entity.encryptPassword();
 			await getRepository(User).save(entity);
-
+			delete entity.password;
+			delete entity.confirmToken;
+			delete entity.resetToken;
 			res.status(201).json({
 				message: 'Usuario registrado con exito.',
+				user: entity,
 			});
 		} catch (error) {
 			// En caso contrario, envio un error.
@@ -115,6 +118,7 @@ export default class UserServices {
 			delete user.password;
 			delete user.confirmToken;
 			delete user.resetToken;
+			res.json(user);
 		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, este usuario no existe.',
@@ -174,16 +178,7 @@ export default class UserServices {
 			// Si existe el usuario, actualizo sus datos.
 			entity = await getRepository(User).findOneOrFail(id);
 
-			// Validando por email
-			if (input.email) {
-				const user = await getRepository(User).findOne(input.email);
-				if (user)
-					return res.status(409).json({
-						message: 'Error, ya existe un usuario con este email.',
-					});
-				entity.email = input.email;
-			}
-
+			entity.email = input.email ? input.email : entity.email;
 			entity.first_name = input.first_name
 				? input.first_name
 				: entity.first_name;
@@ -209,17 +204,19 @@ export default class UserServices {
 		try {
 			// Si no hay errores, guardo el registro de Usuario
 			await getRepository(User).save(entity);
+			delete entity.password;
+			delete entity.confirmToken;
+			delete entity.resetToken;
+			res.status(201).json({
+				message: 'Usuario actualizado con exito.',
+				user: entity,
+			});
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(409).json({
-				message:
-					'Error, ya existe un usuario con este profesionalID o numero de telefono.',
+				message: 'Error, no se pudo guardar el registro',
 			});
 		}
-
-		res.status(201).json({
-			message: 'Usuario actualizado con exito.',
-		});
 	}
 
 	// ======================================
@@ -227,20 +224,24 @@ export default class UserServices {
 	// ======================================
 	public async deleted(req: Request, res: Response) {
 		const id: string = req.params.id;
-
+		let user: User;
 		try {
 			// Verifico si el usuario existe.
-			await getRepository(User).findOneOrFail(id);
+			user = await getRepository(User).findOneOrFail(id);
+			delete user.password;
+			delete user.confirmToken;
+			delete user.resetToken;
+
+			// Elimino el registro
+			await getRepository(User).delete(id);
+			res.status(201).json({
+				message: 'Usuario eliminado con exito.',
+				user
+			});
 		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, el usuario no existe.',
 			});
 		}
-
-		await getRepository(User).delete(id);
-
-		res.status(201).json({
-			message: 'Usuario eliminado con exito.',
-		});
 	}
 }

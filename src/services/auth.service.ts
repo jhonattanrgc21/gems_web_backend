@@ -183,7 +183,7 @@ export default class AuthServices {
 			}
 		}
 
-		if (!user.status)
+		if (user.status)
 			return res.status(400).json({
 				message: 'Error, este usuario ya esta verificado.',
 			});

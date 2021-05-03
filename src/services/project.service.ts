@@ -11,8 +11,8 @@ export default class ProjectServices {
 	//			Crear Proyectos
 	// ======================================
 	public async created(req: Request, res: Response) {
-		const { name } = req.body;
-		const { id } = res.locals.jwtPayload;
+		const name: string = req.body.name;
+		const id = res.locals.jwtPayload.id;
 
 		// Validando los datos que vienen del front
 		if (!name)
@@ -29,15 +29,18 @@ export default class ProjectServices {
 		try {
 			// Si no hay errores, guardo el registro de proyectos
 			await getRepository(Project).save(project);
+			delete project.user.password;
+			delete project.user.confirmToken;
+			delete project.user.resetToken;
+			res.status(201).json({
+				message: 'Proyecto registrado con exito.',
+				project,
+			});
 		} catch (error) {
 			return res.status(409).json({
 				message: 'Error, ya existe un proyecto con este nombre.',
 			});
 		}
-
-		res.status(201).json({
-			message: 'Proyecto registrado con exito.',
-		});
 	}
 
 	// ======================================
@@ -45,7 +48,7 @@ export default class ProjectServices {
 	// ======================================
 	public async findAll(req: Request, res: Response) {
 		let projects;
-		let { id } = res.locals.jwtPayload;
+		let id = res.locals.jwtPayload.id;
 
 		const user = await getRepository(User).findOne(id);
 
@@ -67,18 +70,22 @@ export default class ProjectServices {
 	//		Buscar Proyecto Por ID
 	// ======================================
 	public async findById(req: Request, res: Response) {
-		const { id } = req.params;
+		const id: string = req.params.id;
 		const id_user = res.locals.jwtPayload.id;
 		const user = await getRepository(User).findOne(id_user);
 
 		const project = await getRepository(Project).findOne(id, {
 			where: { user },
-			relations: ['boards'],
+			relations: ['user', 'boards'],
 		});
 
 		// Si existe el proyecto, devuelvo sus datos.
-		if (project) res.json(project);
-		else {
+		if (project) {
+			delete project.user.password;
+			delete project.user.confirmToken;
+			delete project.user.resetToken;
+			res.json(project);
+		} else {
 			return res.status(404).json({
 				message: 'Error, este proyecto no esta registrado.',
 			});
@@ -89,10 +96,10 @@ export default class ProjectServices {
 	//			Actualizar Proyecto
 	// ======================================
 	public async updated(req: Request, res: Response) {
-		const { id } = req.params;
-		const { name } = req.body;
-
+		const id: string = req.params.id;
+		const name: string = req.body.name;
 		const id_user = res.locals.jwtPayload.id;
+
 		const user = await getRepository(User).findOne(id_user);
 
 		let project: Project;
@@ -100,7 +107,7 @@ export default class ProjectServices {
 			// Si existe el proyecto, actualizo su nombre.
 			project = await getRepository(Project).findOneOrFail(id, {
 				where: { user },
-				relations: ['boards'],
+				relations: ['user', 'boards'],
 			});
 			project.name = name;
 		} catch (error) {
@@ -112,41 +119,51 @@ export default class ProjectServices {
 		try {
 			// Si no hay errores, guardo el registro del proyecto
 			await getRepository(Project).save(project);
+			delete project.user.password;
+			delete project.user.confirmToken;
+			delete project.user.resetToken;
+			res.status(201).json({
+				message: 'Proyecto actualizado con exito.',
+				project,
+			});
 		} catch (error) {
 			// En caso contrario, envio un error.
 			return res.status(409).json({
-				message: 'Error, ya existe un proyecto con este nombre.',
+				message: 'Error, no se pudo guardar el registro',
 			});
 		}
-
-		res.status(201).json({
-			message: 'Proyecto actualizado con exito.',
-		});
 	}
 
 	// ======================================
 	//			Eliminar Proyecto
 	// ======================================
 	public async deleted(req: Request, res: Response) {
-		const { id } = req.params;
-
+		const id: string = req.params.id;
 		const id_user = res.locals.jwtPayload.id;
+		let project: Project;
 		const user = await getRepository(User).findOne(id_user);
+
 		try {
 			// Verifico si el proyecto existe.
-			await getRepository(Project).findOneOrFail(id, {
+			project = await getRepository(Project).findOneOrFail(id, {
 				where: { user },
+				relations: ['user', 'boards']
+			});
+
+			delete project.user.password;
+			delete project.user.confirmToken;
+			delete project.user.resetToken;
+
+			// Elimino el registro del proyecto
+			await getRepository(Project).delete(id);
+			res.status(201).json({
+				message: 'Proyecto eliminado con exito.',
+				project,
 			});
 		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, el proyecto no existe.',
 			});
 		}
-
-		await getRepository(Project).delete(id);
-
-		res.status(201).json({
-			message: 'Proyecto eliminado con exito.',
-		});
 	}
 }

@@ -1,8 +1,7 @@
 import {
-	Entity,
 	Column,
-	OneToMany,
-	PrimaryGeneratedColumn,
+	Entity,
+	OneToMany
 } from 'typeorm';
 import User from './users.entity';
 import UuidEntity from './uuid.entity';
