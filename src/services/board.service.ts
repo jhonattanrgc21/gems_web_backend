@@ -21,7 +21,7 @@ export default class BoardServices {
 		const user = await getRepository(User).findOne(id_user);
 
 		// Validando que los datos que vienen del Front-End
-		if (!input.project.id && !input.name)
+		if (Object.keys(input.project).length == 0 || !input.name)
 			return res.status(401).json({
 				message:
 					'Error, el proyecto asociado no existe o el nombre del tablero es requerido.',
@@ -120,7 +120,7 @@ export default class BoardServices {
 
 		// Busco al usuario correspondiente
 		const user = await getRepository(User).findOne(id_user);
-		if (!input.project.id)
+		if (Object.keys(input.project).length == 0)
 			return res.status(401).json({
 				message: 'Error, el proyecto asociado no existe.',
 			});

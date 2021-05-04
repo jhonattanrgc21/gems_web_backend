@@ -4,6 +4,18 @@ import Circuit from '../../database/entities/circuits.entity';
 //			Report Interface
 // ======================================
 export interface CreateReportInterface {
+	loadType: number;
+	power: number;
+	distance: number;
+	powerFactor: number;
+	voltageDrop: number;
+	aisolation: number;
+	temperature: number;
+	loadPhases: number;
+	perPhase: number;
+	feeder_include_neutral_wire: boolean;
+	pipe_material: number;
+	system_voltage: number;
 	current: number;
 	cable_width: string;
 	pipe_diameter: string;
@@ -13,6 +25,18 @@ export interface CreateReportInterface {
 }
 
 export interface UpdateReportInterface {
+	loadType?: number;
+	power?: number;
+	distance?: number;
+	powerFactor?: number;
+	voltageDrop?: number;
+	aisolation?: number;
+	temperature?: number;
+	loadPhases?: number;
+	perPhase?: number;
+	feeder_include_neutral_wire?: boolean;
+	pipe_material?: number;
+	system_voltage?: number;
 	current?: number;
 	cable_width?: string;
 	pipe_diameter?: string;

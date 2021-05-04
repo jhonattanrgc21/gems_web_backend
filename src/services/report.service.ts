@@ -32,13 +32,25 @@ export default class CircuitServices {
 		// Validando que vienen datos del Front-End
 		if (
 			!(
+				input.loadType &&
+				input.power &&
+				input.distance &&
+				input.powerFactor &&
+				input.voltageDrop &&
+				input.aisolation &&
+				input.temperature &&
+				input.loadPhases &&
+				input.perPhase &&
+				input.feeder_include_neutral_wire &&
+				input.pipe_material &&
+				input.system_voltage &&
 				input.current &&
 				input.cable_width &&
 				input.pipe_diameter &&
 				input.protection_device &&
-				input.voltage_drop &&
-				input.circuit.id
-			)
+				input.voltage_drop
+			) ||
+			Object.keys(input.circuit).length == 0
 		)
 			return res.status(400).json({
 				message:
@@ -53,6 +65,18 @@ export default class CircuitServices {
 			});
 		}
 
+		report.loadType = input.loadType;
+		report.power = input.power;
+		report.distance = input.distance;
+		report.powerFactor = report.powerFactor;
+		report.voltageDrop = input.voltageDrop;
+		report.aisolation = input.aisolation;
+		report.temperature = input.temperature;
+		report.loadPhases = input.loadPhases;
+		report.perPhase = input.perPhase;
+		report.feeder_include_neutral_wire = input.feeder_include_neutral_wire;
+		report.pipe_material = input.pipe_material;
+		report.system_voltage = input.system_voltage;
 		report.current = input.current;
 		report.cable_width = input.cable_width;
 		report.pipe_diameter = input.pipe_diameter;
@@ -413,6 +437,11 @@ export default class CircuitServices {
 		let circuit: Circuit;
 		let report: Report;
 
+		if (Object.keys(input.circuit).length == 0)
+			return res.status(401).json({
+				message: 'Error, el circuito padre no existe.',
+			});
+
 		try {
 			circuit = await getRepository(Circuit).findOneOrFail(
 				input.circuit.id,
@@ -430,19 +459,51 @@ export default class CircuitServices {
 				relations: ['circuit'],
 			});
 
-			report.current = input.current ? input.current : report.current;
+			report.loadType =
+				input.loadType > -1 ? input.loadType : report.loadType;
+			report.power = input.power > -1 ? input.power : report.power;
+			report.distance =
+				input.distance > -1 ? input.distance : report.distance;
+			report.powerFactor =
+				report.powerFactor > -1
+					? input.powerFactor
+					: report.powerFactor;
+			report.voltageDrop =
+				input.voltageDrop > -1 ? input.voltageDrop : report.voltageDrop;
+			report.aisolation =
+				input.aisolation > -1 ? input.aisolation : report.aisolation;
+			report.temperature =
+				input.temperature > -1 ? input.temperature : report.temperature;
+			report.loadPhases =
+				input.loadPhases > -1 ? input.loadPhases : report.loadPhases;
+			report.perPhase =
+				input.perPhase > -1 ? input.perPhase : report.perPhase;
+			report.feeder_include_neutral_wire =
+				input.feeder_include_neutral_wire;
+			report.pipe_material =
+				input.pipe_material > -1
+					? input.pipe_material
+					: report.pipe_material;
+			report.system_voltage =
+				input.system_voltage > -1
+					? input.system_voltage
+					: report.system_voltage;
+			report.current =
+				input.current > -1 ? input.current : report.current;
 			report.cable_width = input.cable_width
 				? input.cable_width
 				: report.cable_width;
 			report.pipe_diameter = input.pipe_diameter
 				? input.pipe_diameter
 				: report.pipe_diameter;
-			report.protection_device = input.protection_device
-				? input.protection_device
-				: report.protection_device;
-			report.voltaje_drop = input.voltage_drop
-				? input.voltage_drop
-				: report.voltaje_drop;
+			report.protection_device =
+				input.protection_device > -1
+					? input.protection_device
+					: report.protection_device;
+			report.voltaje_drop =
+				input.voltage_drop > -1
+					? input.voltage_drop
+					: report.voltaje_drop;
 		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, el reporte no existe.',

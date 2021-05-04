@@ -12,6 +12,102 @@ import UuidEntity from './uuid.entity';
 // ======================================
 @Entity('reports')
 export default class Report extends UuidEntity {
+		@Column({
+		type: 'tinyint',
+		unsigned: true,
+		nullable: true,
+		comment: 'Tipo de carga',
+	})
+	public loadType?: number;
+
+	@Column({
+		type: 'int',
+		unsigned: true,
+		nullable: true,
+		comment: 'Potencia del circuito',
+	})
+	public power?: number;
+
+	@Column({
+		type: 'tinyint',
+		unsigned: true,
+		nullable: true,
+		comment: 'Potencia del circuito',
+	})
+	public distance?: number;
+
+	@Column({
+		type: 'float',
+		precision: 3,
+		scale: 1,
+		nullable: true,
+		comment: 'Factor de potencia',
+	})
+	public powerFactor?: number;
+
+	@Column({
+		type: 'tinyint',
+		unsigned: true,
+		nullable: true,
+		comment: 'Caida de voltaje',
+	})
+	public voltageDrop?: number;
+
+	@Column({
+		type: 'tinyint',
+		unsigned: true,
+		nullable: true,
+		comment: 'Capacidad de aislamiento',
+	})
+	public aisolation?: number;
+
+	@Column({
+		type: 'tinyint',
+		unsigned: true,
+		nullable: true,
+		comment: 'Grados de temperatura',
+	})
+	public temperature?: number;
+
+	@Column({
+		type: 'tinyint',
+		unsigned: true,
+		nullable: true,
+		comment: 'Fases',
+	})
+	public loadPhases?: number;
+
+	@Column({
+		type: 'tinyint',
+		unsigned: true,
+		nullable: true,
+		comment: 'Conductores por fases',
+	})
+	public perPhase?: number;
+
+	@Column({
+		type: 'bool',
+		nullable: true,
+		comment: 'Alimentador por cable neutro',
+	})
+	public feeder_include_neutral_wire?: boolean;
+
+	@Column({
+		type: 'tinyint',
+		unsigned: true,
+		nullable: true,
+		comment: 'Materia de tuberia',
+	})
+	public pipe_material?: number;
+
+	@Column({
+		type: 'smallint',
+		unsigned: true,
+		nullable: true,
+		comment: 'Tension del sistema',
+	})
+	public system_voltage?: number;
+
 	@Column({
 		type: 'float',
 		precision: 10,

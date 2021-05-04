@@ -3,10 +3,7 @@ import { getRepository } from 'typeorm';
 
 import Circuit from '../database/entities/circuits.entity';
 import Board from '../database/entities/boards.entity';
-import {
-	CreateCircuitInterface,
-	UpdateCircuitInterface,
-} from '../app/interfaces/circuit.interface';
+import { CircuitInterface } from '../app/interfaces/circuit.interface';
 
 // ======================================
 //			Circuit Service
@@ -16,11 +13,11 @@ export default class CircuitServices {
 	//			Crear Circuito
 	// ======================================
 	public async created(req: Request, res: Response) {
-		const input: CreateCircuitInterface = req.body;
+		const input: CircuitInterface = req.body;
 		let circuit = new Circuit();
 
 		// Validando los datos que vienen del front
-		if (!input.name && !input.board_padre.id)
+		if (!input.name || Object.keys(input.board_padre).length == 0)
 			return res.status(400).json({
 				message:
 					'Error, el nombre es requerido y los datos del board padre.',
@@ -94,8 +91,15 @@ export default class CircuitServices {
 	// ======================================
 	public async updated(req: Request, res: Response) {
 		const id: string = req.params.id;
-		const input: UpdateCircuitInterface = req.body;
+		const input: CircuitInterface = req.body;
 		let circuit: Circuit;
+
+		if (Object.keys(input.board_padre).length == 0)
+			return res.status(400).json({
+				message:
+					'Error, el board padre es requerido.',
+			});
+
 		try {
 			// Si existe el circuito, actualizo sus datos.
 			circuit = await getRepository(Circuit).findOneOrFail(id, {
@@ -103,40 +107,6 @@ export default class CircuitServices {
 				relations: ['board_padre', 'reports'],
 			});
 			circuit.name = input.name ? input.name : circuit.name;
-
-			circuit.loadType =
-				input.loadType > -1 ? input.loadType : circuit.loadType;
-			circuit.power = input.power ? input.power : circuit.power;
-			circuit.distance =
-				input.distance > -1 ? input.distance : circuit.distance;
-			circuit.powerFactor =
-				input.powerFactor > -1
-					? input.powerFactor
-					: circuit.powerFactor;
-			circuit.voltageDrop =
-				input.voltageDrop > -1
-					? input.voltageDrop
-					: circuit.voltageDrop;
-			circuit.aisolation =
-				input.aisolation > -1 ? input.aisolation : circuit.aisolation;
-			circuit.temperature =
-				input.temperature > -1
-					? input.temperature
-					: circuit.temperature;
-			circuit.loadPhases =
-				input.loadPhases > -1 ? input.loadPhases : circuit.loadPhases;
-			circuit.perPhase =
-				input.perPhase > -1 ? input.perPhase : circuit.perPhase;
-			circuit.feeder_include_neutral_wire =
-				input.feeder_include_neutral_wire;
-			circuit.pipe_material =
-				input.pipe_material > -1
-					? input.pipe_material
-					: circuit.pipe_material;
-			circuit.system_voltage =
-				input.system_voltage > -1
-					? input.system_voltage
-					: circuit.system_voltage;
 		} catch (error) {
 			return res.status(404).json({
 				message: 'Error, el circuito no existe.',
