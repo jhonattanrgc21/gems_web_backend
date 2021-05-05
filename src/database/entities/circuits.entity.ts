@@ -5,7 +5,7 @@ import {
 	Entity,
 	JoinColumn,
 	ManyToOne,
-	OneToMany,
+	OneToOne,
 } from 'typeorm';
 import UuidEntity from './uuid.entity';
 
@@ -29,6 +29,6 @@ export default class Circuit extends UuidEntity {
 	public board_padre!: Board;
 
 	// Un circuito puede generar muchos reportes
-	@OneToMany(() => Report, (reports: Report) => reports.circuit)
-	public reports?: Report[];
+	@OneToOne(() => Report, (report: Report) => report.circuit)
+	public report?: Report;
 }

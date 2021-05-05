@@ -56,7 +56,7 @@ export default class CircuitServices {
 
 		// Verifico si existen circuitos
 		circuits = await getRepository(Circuit).find({
-			relations: ['board_padre', 'reports'],
+			relations: ['board_padre', 'report'],
 		});
 
 		if (circuits.length)
@@ -76,7 +76,7 @@ export default class CircuitServices {
 		try {
 			// Si existe el circuito, devuelvo sus datos.
 			const circuit = await getRepository(Circuit).findOneOrFail(id, {
-				relations: ['board_padre', 'reports'],
+				relations: ['board_padre', 'report'],
 			});
 			res.json(circuit);
 		} catch (error) {
@@ -104,7 +104,7 @@ export default class CircuitServices {
 			// Si existe el circuito, actualizo sus datos.
 			circuit = await getRepository(Circuit).findOneOrFail(id, {
 				where: { board_padre: input.board_padre },
-				relations: ['board_padre', 'reports'],
+				relations: ['board_padre', 'report'],
 			});
 			circuit.name = input.name ? input.name : circuit.name;
 		} catch (error) {
