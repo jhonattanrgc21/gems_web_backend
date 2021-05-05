@@ -31,25 +31,7 @@ export default class CircuitServices {
 
 		// Validando que vienen datos del Front-End
 		if (
-			!(
-				input.loadType &&
-				input.power &&
-				input.distance &&
-				input.powerFactor &&
-				input.voltageDrop &&
-				input.aisolation &&
-				input.temperature &&
-				input.loadPhases &&
-				input.perPhase &&
-				input.feeder_include_neutral_wire &&
-				input.pipe_material &&
-				input.system_voltage &&
-				input.current &&
-				input.cable_width &&
-				input.pipe_diameter &&
-				input.protection_device &&
-				input.voltage_drop
-			) ||
+			Object.values(input).length != 18 ||
 			Object.keys(input.circuit).length == 0
 		)
 			return res.status(400).json({

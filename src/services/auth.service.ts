@@ -100,7 +100,7 @@ export default class AuthServices {
 			res.status(400).json({ message: 'Algo salio mal.' });
 		}
 
-		res.status(201).json({ message, info: emailStatus });
+		res.status(201).json({ message, info: emailStatus, token: verificacionLink });
 	}
 
 	// ======================================
