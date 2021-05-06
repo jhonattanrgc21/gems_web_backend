@@ -50,7 +50,7 @@ export default class CircuitServices {
 		report.loadType = input.loadType;
 		report.power = input.power;
 		report.distance = input.distance;
-		report.powerFactor = report.powerFactor;
+		report.powerFactor = input.powerFactor;
 		report.voltageDrop = input.voltageDrop;
 		report.aisolation = input.aisolation;
 		report.temperature = input.temperature;

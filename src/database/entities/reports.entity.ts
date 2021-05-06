@@ -37,9 +37,9 @@ export default class Report extends UuidEntity {
 	public distance?: number;
 
 	@Column({
-		type: 'float',
+		type: 'decimal',
 		precision: 3,
-		scale: 1,
+		scale: 2,
 		nullable: true,
 		comment: 'Factor de potencia',
 	})
