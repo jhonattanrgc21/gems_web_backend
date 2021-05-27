@@ -109,6 +109,14 @@ export default class Report extends UuidEntity {
 	public system_voltage?: number;
 
 	@Column({
+		type: 'int',
+		unsigned: true,
+		nullable: true,
+		comment: 'Conductor de puesta a tierra',
+	})
+	public grounding_conductor?: number;
+
+	@Column({
 		type: 'float',
 		precision: 10,
 		scale: 2,

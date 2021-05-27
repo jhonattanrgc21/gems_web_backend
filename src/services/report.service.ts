@@ -16,6 +16,7 @@ import {
 	b161Y,
 	b161X,
 	pipe,
+	u11
 } from '../config/tableCalculate';
 
 // ======================================
@@ -31,7 +32,7 @@ export default class CircuitServices {
 
 		// Validando que vienen datos del Front-End
 		if (
-			Object.values(input).length != 18 ||
+			Object.values(input).length != 19 ||
 			Object.keys(input.circuit).length == 0
 		)
 			return res.status(400).json({
@@ -59,6 +60,7 @@ export default class CircuitServices {
 		report.feeder_include_neutral_wire = input.feeder_include_neutral_wire;
 		report.pipe_material = input.pipe_material;
 		report.system_voltage = input.system_voltage;
+		report.grounding_conductor = input.grounding_conductor;
 		report.current = input.current;
 		report.cable_width = input.cable_width;
 		report.pipe_diameter = input.pipe_diameter;
@@ -361,12 +363,16 @@ export default class CircuitServices {
 					'Error, no se encontro el calibre en la PosicionY del vector B161.',
 			});
 
+		// Calculando el D182
+		const D182 = u11.find((elem) => elem >= Protecc);
+
 		const calculos = {
 			current: E102,
 			cable_width: CalibreSelecc,
 			pipe_diameter: pipe[PosicionX],
 			protection_device: Protecc,
 			voltage_drop: DV,
+			grounding_conductor: D182 
 		};
 
 		return res.json(calculos);
@@ -470,6 +476,10 @@ export default class CircuitServices {
 				input.system_voltage > -1
 					? input.system_voltage
 					: report.system_voltage;
+			report.grounding_conductor =
+				input.grounding_conductor > -1
+					? input.grounding_conductor
+					: report.grounding_conductor;
 			report.current =
 				input.current > -1 ? input.current : report.current;
 			report.cable_width = input.cable_width

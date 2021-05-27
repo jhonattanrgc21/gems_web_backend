@@ -16,6 +16,7 @@ export interface CreateReportInterface {
 	feeder_include_neutral_wire: boolean;
 	pipe_material: number;
 	system_voltage: number;
+	grounding_conductor: number;
 	current: number;
 	cable_width: string;
 	pipe_diameter: string;
@@ -37,6 +38,7 @@ export interface UpdateReportInterface {
 	feeder_include_neutral_wire?: boolean;
 	pipe_material?: number;
 	system_voltage?: number;
+	grounding_conductor?: number;
 	current?: number;
 	cable_width?: string;
 	pipe_diameter?: string;
