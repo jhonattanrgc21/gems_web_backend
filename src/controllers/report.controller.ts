@@ -23,7 +23,7 @@ routes.post('/', [checkJwt], services.created);
 routes.get('/', [checkJwt], services.findAll);
 
 // Obtener la lista de valores previos a la insercion del registro
-routes.post('/listForm', [checkJwt], services.reportPrevio);
+routes.post('/listForm', [checkJwt],services.reportPrevio);
 
 // Obtener un solo reporte
 routes.get('/:id', [checkJwt], services.findById);

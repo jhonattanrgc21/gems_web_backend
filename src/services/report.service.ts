@@ -16,7 +16,8 @@ import {
 	b161Y,
 	b161X,
 	pipe,
-	u11
+	u11,
+	v11,
 } from '../config/tableCalculate';
 
 // ======================================
@@ -364,7 +365,8 @@ export default class CircuitServices {
 			});
 
 		// Calculando el D182
-		const D182 = u11.find((elem) => elem >= Protecc);
+		const D182_index = u11.findIndex((elem) => elem >= Protecc);
+		const D182 = v11[D182_index];
 
 		const calculos = {
 			current: E102,
@@ -372,7 +374,7 @@ export default class CircuitServices {
 			pipe_diameter: pipe[PosicionX],
 			protection_device: Protecc,
 			voltage_drop: DV,
-			grounding_conductor: D182 
+			grounding_conductor: D182,
 		};
 
 		return res.json(calculos);
@@ -476,10 +478,9 @@ export default class CircuitServices {
 				input.system_voltage > -1
 					? input.system_voltage
 					: report.system_voltage;
-			report.grounding_conductor =
-				input.grounding_conductor > -1
-					? input.grounding_conductor
-					: report.grounding_conductor;
+			report.grounding_conductor = input.grounding_conductor
+				? input.grounding_conductor
+				: report.grounding_conductor;
 			report.current =
 				input.current > -1 ? input.current : report.current;
 			report.cable_width = input.cable_width
