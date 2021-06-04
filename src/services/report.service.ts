@@ -41,6 +41,7 @@ export default class CircuitServices {
 					'Todos los campos son requeridod y es necesario los datos del circuito padre.',
 			});
 
+		let circuit;
 		try {
 			await getRepository(Circuit).findOneOrFail(input.circuit.id);
 		} catch (error) {
@@ -48,6 +49,18 @@ export default class CircuitServices {
 				message: 'Error, el circuito padre no existe.',
 			});
 		}
+
+		// Verifico si existe un reporte con este circuito
+		const existeReport = await getRepository(Report).find({
+			where: { circuit },
+			relations: ['circuit'],
+		});
+
+		if(existeReport.length)
+			return res.status(409).json({
+				message: 'Error, ya existe un reporte asociado a este circuito.',
+			});
+
 
 		report.loadType = input.loadType;
 		report.power = input.power;
