@@ -43,7 +43,7 @@ export default class CircuitServices {
 
 		let circuit;
 		try {
-			await getRepository(Circuit).findOneOrFail(input.circuit.id);
+			circuit = await getRepository(Circuit).findOneOrFail(input.circuit.id);
 		} catch (error) {
 			return res.status(401).json({
 				message: 'Error, el circuito padre no existe.',
